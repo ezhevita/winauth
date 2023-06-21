@@ -16,7 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -77,7 +80,6 @@ namespace WinAuth
 		/// URLs for all mobile services
 		/// </summary>
 		private static string COMMUNITY_BASE = "https://steamcommunity.com";
-		private static string WEBAPI_BASE = "https://api.steampowered.com";
 		private static string SYNC_URL = "https://api.steampowered.com:443/ITwoFactorService/QueryTime/v0001";
 
 		/// <summary>
@@ -109,7 +111,7 @@ namespace WinAuth
 			public CookieContainer Cookies { get; set; }
 
 			public string SteamId { get; set; }
-			public string OAuthToken { get; set; }
+			public string SteamLoginSecure { get; set; }
 
 			public bool RequiresLogin { get; set; }
 			public bool RequiresCaptcha { get; set; }
@@ -152,7 +154,7 @@ namespace WinAuth
 		public string SessionData { get; set; }
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public string PollData { get; set; }
 
@@ -343,307 +345,7 @@ namespace WinAuth
 		/// </summary>
 		public bool Enroll(EnrollState state)
 		{
-			// clear error
-			state.Error = null;
-
-			try
-			{
-				var data = new NameValueCollection();
-				var cookies = state.Cookies = state.Cookies ?? new CookieContainer();
-				string response;
-
-				if (string.IsNullOrEmpty(state.OAuthToken))
-				{
-					// get session
-					if (cookies.Count == 0)
-					{
-						cookies.Add(new Uri(COMMUNITY_BASE + "/"), new Cookie("mobileClientVersion", "3067969+%282.1.3%29"));
-						cookies.Add(new Uri(COMMUNITY_BASE + "/"), new Cookie("mobileClient", "android"));
-						cookies.Add(new Uri(COMMUNITY_BASE + "/"), new Cookie("steamid", ""));
-						cookies.Add(new Uri(COMMUNITY_BASE + "/"), new Cookie("steamLogin", ""));
-						cookies.Add(new Uri(COMMUNITY_BASE + "/"), new Cookie("Steam_Language", "english"));
-						cookies.Add(new Uri(COMMUNITY_BASE + "/"), new Cookie("dob", ""));
-
-						NameValueCollection headers = new NameValueCollection();
-						headers.Add("X-Requested-With", "com.valvesoftware.android.steam.community");
-
-						response = Request("https://steamcommunity.com/mobilelogin?oauth_client_id=DE45CD61&oauth_scope=read_profile%20write_profile%20read_client%20write_client", "GET", null, cookies, headers);
-					}
-
-					// Steam strips any non-ascii chars from username and password
-					state.Username = Regex.Replace(state.Username, @"[^\u0000-\u007F]", string.Empty);
-					state.Password = Regex.Replace(state.Password, @"[^\u0000-\u007F]", string.Empty);
-
-					// get the user's RSA key
-					data.Add("username", state.Username);
-					response = Request(COMMUNITY_BASE + "/mobilelogin/getrsakey", "POST", data, cookies);
-					var rsaresponse = JObject.Parse(response);
-					if (rsaresponse.SelectToken("success").Value<bool>() != true)
-					{
-						throw new InvalidEnrollResponseException("Cannot get steam information for user: " + state.Username);
-					}
-
-					// encrypt password with RSA key
-					RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
-					byte[] encryptedPassword;
-					using (var rsa = new RSACryptoServiceProvider())
-					{
-						var passwordBytes = Encoding.ASCII.GetBytes(state.Password);
-						var p = rsa.ExportParameters(false);
-						p.Exponent = StringToByteArray(rsaresponse.SelectToken("publickey_exp").Value<string>());
-						p.Modulus = StringToByteArray(rsaresponse.SelectToken("publickey_mod").Value<string>());
-						rsa.ImportParameters(p);
-						encryptedPassword = rsa.Encrypt(passwordBytes, false);
-					}
-
-					// login request
-					data = new NameValueCollection();
-					data.Add("password", Convert.ToBase64String(encryptedPassword));
-					data.Add("username", state.Username);
-					data.Add("twofactorcode", "");
-					data.Add("emailauth", (state.EmailAuthText != null ? state.EmailAuthText : string.Empty));
-					data.Add("loginfriendlyname", "#login_emailauth_friendlyname_mobile");
-					data.Add("captchagid", (state.CaptchaId != null ? state.CaptchaId : "-1"));
-					data.Add("captcha_text", (state.CaptchaText != null ? state.CaptchaText : "enter above characters"));
-					data.Add("emailsteamid", (state.EmailAuthText != null ? state.SteamId ?? string.Empty : string.Empty));
-					data.Add("rsatimestamp", rsaresponse.SelectToken("timestamp").Value<string>());
-					data.Add("remember_login", "false");
-					data.Add("oauth_client_id", "DE45CD61");
-					data.Add("oauth_scope", "read_profile write_profile read_client write_client");
-					data.Add("donotache", new DateTime().ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds.ToString());
-					response = Request(COMMUNITY_BASE + "/mobilelogin/dologin/", "POST", data, cookies);
-					Dictionary<string, object> loginresponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(response);
-
-					if (loginresponse.ContainsKey("emailsteamid"))
-					{
-						state.SteamId = loginresponse["emailsteamid"] as string;
-					}
-
-					// require captcha
-					if (loginresponse.ContainsKey("captcha_needed") && (bool)loginresponse["captcha_needed"])
-					{
-						state.RequiresCaptcha = true;
-						state.CaptchaId = (string)loginresponse["captcha_gid"];
-						state.CaptchaUrl = COMMUNITY_BASE + "/public/captcha.php?gid=" + state.CaptchaId;
-					}
-					else
-					{
-						state.RequiresCaptcha = false;
-						state.CaptchaId = null;
-						state.CaptchaUrl = null;
-						state.CaptchaText = null;
-					}
-
-					// require email auth
-					if (loginresponse.ContainsKey("emailauth_needed") && (bool)loginresponse["emailauth_needed"])
-					{
-						if (loginresponse.ContainsKey("emaildomain"))
-						{
-							var emaildomain = (string)loginresponse["emaildomain"];
-							if (string.IsNullOrEmpty(emaildomain) == false)
-							{
-								state.EmailDomain = emaildomain;
-							}
-						}
-						state.RequiresEmailAuth = true;
-					}
-					else
-					{
-						state.EmailDomain = null;
-						state.RequiresEmailAuth = false;
-					}
-
-					// require email auth
-					if (loginresponse.ContainsKey("requires_twofactor") && (bool)loginresponse["requires_twofactor"])
-					{
-						state.Requires2FA = true;
-					}
-					else
-					{
-						state.Requires2FA = false;
-					}
-
-					// if we didn't login, return the result
-					if (loginresponse.ContainsKey("login_complete") == false || (bool)loginresponse["login_complete"] == false || loginresponse.ContainsKey("oauth") == false)
-					{
-						if (loginresponse.ContainsKey("oauth") == false)
-						{
-							state.Error = "Invalid response from Steam (No OAuth token)";
-						}
-						if (loginresponse.ContainsKey("message"))
-						{
-							state.Error = (string)loginresponse["message"];
-						}
-						return false;
-					}
-
-					// get the OAuth token - is stringified json
-					string oauth = (string)loginresponse["oauth"];
-					var oauthjson = JObject.Parse(oauth);
-					state.OAuthToken = oauthjson.SelectToken("oauth_token").Value<string>();
-					if (oauthjson.SelectToken("steamid") != null)
-					{
-						state.SteamId = oauthjson.SelectToken("steamid").Value<string>();
-					}
-				}
-
-				// login to webapi
-				data.Clear();
-				data.Add("access_token", state.OAuthToken);
-				response = Request(WEBAPI_BASE + "/ISteamWebUserPresenceOAuth/Logon/v0001", "POST", data);
-
-				var sessionid = cookies.GetCookies(new Uri(COMMUNITY_BASE + "/"))["sessionid"].Value;
-
-				if (state.RequiresActivation == false)
-				{
-					data.Clear();
-					data.Add("op", "has_phone");
-					data.Add("arg", "null");
-					data.Add("sessionid", sessionid);
-
-					response = Request(COMMUNITY_BASE + "/steamguard/phoneajax", "POST", data, cookies);
-					var jsonresponse = JObject.Parse(response);
-					bool hasPhone = jsonresponse.SelectToken("has_phone").Value<Boolean>();
-					if (hasPhone == false)
-					{
-						state.OAuthToken = null; // force new login
-						state.RequiresLogin = true;
-						state.Cookies = null;
-						state.Error = "Your Steam account must have a SMS-capable phone number attached. Go into Account Details of the Steam client or Steam website and click Add a Phone Number.";
-						return false;
-					}
-
-					//response = Request(COMMUNITY_BASE + "/steamguard/phone_checksms?bForTwoFactor=1&bRevoke2fOnCancel=", "GET", null, cookies);
-
-					// add a new authenticator
-					data.Clear();
-					string deviceId = BuildRandomId();
-					data.Add("access_token", state.OAuthToken);
-					data.Add("steamid", state.SteamId);
-					data.Add("authenticator_type", "1");
-					data.Add("device_identifier", deviceId);
-					data.Add("sms_phone_id", "1");
-					response = Request(WEBAPI_BASE + "/ITwoFactorService/AddAuthenticator/v0001", "POST", data);
-					var tfaresponse = JObject.Parse(response);
-					if (response.IndexOf("status") == -1 && tfaresponse.SelectToken("response.status").Value<int>() == 84)
-					{
-						// invalid response
-						state.OAuthToken = null; // force new login
-						state.RequiresLogin = true;
-						state.Cookies = null;
-						state.Error = "Unable to send SMS. Check your phone is registered on your Steam account.";
-						return false;
-					}
-					if (response.IndexOf("shared_secret") == -1)
-					{
-						// invalid response
-						state.OAuthToken = null; // force new login
-						state.RequiresLogin = true;
-						state.Cookies = null;
-						state.Error = "Invalid response from Steam: " + response;
-						return false;
-					}
-
-					// save data into this authenticator
-					var secret = tfaresponse.SelectToken("response.shared_secret").Value<string>();
-					SecretKey = Convert.FromBase64String(secret);
-					Serial = tfaresponse.SelectToken("response.serial_number").Value<string>();
-					DeviceId = deviceId;
-					state.RevocationCode = tfaresponse.SelectToken("response.revocation_code").Value<string>();
-
-					// add the steamid into the data
-					var steamdata = JObject.Parse(tfaresponse.SelectToken("response").ToString());
-					if (steamdata.SelectToken("steamid") == null)
-					{
-						steamdata.Add("steamid", state.SteamId);
-					}
-					if (steamdata.SelectToken("steamguard_scheme") == null)
-					{
-						steamdata.Add("steamguard_scheme", "2");
-					}
-					SteamData = steamdata.ToString(Formatting.None);
-
-					// calculate server drift
-					long servertime = tfaresponse.SelectToken("response.server_time").Value<long>() * 1000;
-					ServerTimeDiff = servertime - CurrentTime;
-					LastServerTime = DateTime.Now.Ticks;
-
-					state.RequiresActivation = true;
-
-					return false;
-				}
-
-				// finalize adding the authenticator
-				data.Clear();
-				data.Add("access_token", state.OAuthToken);
-				data.Add("steamid", state.SteamId);
-				data.Add("activation_code", state.ActivationCode);
-
-				// try and authorise
-				var retries = 0;
-				while (state.RequiresActivation && retries < ENROLL_ACTIVATE_RETRIES)
-				{
-					data.Add("authenticator_code", CalculateCode());
-					data.Add("authenticator_time", ServerTime.ToString());
-					response = Request(WEBAPI_BASE + "/ITwoFactorService/FinalizeAddAuthenticator/v0001", "POST", data);
-					var finalizeresponse = JObject.Parse(response);
-					if (response.IndexOf("status") != -1 && finalizeresponse.SelectToken("response.status").Value<int>() == INVALID_ACTIVATION_CODE)
-					{
-						state.Error = "Invalid activation code";
-						return false;
-					}
-
-					// reset our time
-					if (response.IndexOf("server_time") != -1)
-					{
-						long servertime = finalizeresponse.SelectToken("response.server_time").Value<long>() * 1000;
-						ServerTimeDiff = servertime - CurrentTime;
-						LastServerTime = DateTime.Now.Ticks;
-					}
-
-					// check success
-					if (finalizeresponse.SelectToken("response.success").Value<bool>())
-					{
-						if (response.IndexOf("want_more") != -1 && finalizeresponse.SelectToken("response.want_more").Value<bool>())
-						{
-							ServerTimeDiff += (Period * 1000L);
-							retries++;
-							continue;
-						}
-						state.RequiresActivation = false;
-						break;
-					}
-
-					ServerTimeDiff += (Period * 1000L);
-					retries++;
-				}
-				if (state.RequiresActivation)
-				{
-					state.Error = "There was a problem activating. There might be an issue with the Steam servers. Please try again later.";
-					return false;
-				}
-
-				// mark and successful and return key
-				state.Success = true;
-				state.SecretKey = ByteArrayToString(SecretKey);
-
-				// send confirmation email
-				data.Clear();
-				data.Add("access_token", state.OAuthToken);
-				data.Add("steamid", state.SteamId);
-				data.Add("email_type", "2");
-				response = Request(WEBAPI_BASE + "/ITwoFactorService/SendEmail/v0001", "POST", data);
-
-				return true;
-			}
-			catch (UnauthorisedRequestException ex)
-			{
-				throw new InvalidEnrollResponseException("You are not allowed to add an authenticator. Have you enabled 'community-generated content' in Family View?", ex);
-			}
-			catch (InvalidRequestException ex)
-			{
-				throw new InvalidEnrollResponseException("Error enrolling new authenticator", ex);
-			}
+			return false;
 		}
 
 		/// <summary>

@@ -42,7 +42,7 @@ namespace WinAuth
 		{
 			HasHandle = false;
 
-			string appGuid = ((GuidAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value;
+			string appGuid = "29A958B4-AC43-4AEF-B12A-0032CB94705D";
 			string userGuid = WindowsIdentity.GetCurrent().User.Value;
 			string mutexId = string.Format("Global\\{{{0}}}-{{{1}}}", userGuid, appGuid);
 			_mutex = new Mutex(false, mutexId);

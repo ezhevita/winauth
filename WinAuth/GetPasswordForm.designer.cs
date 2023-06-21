@@ -46,7 +46,7 @@ namespace WinAuth
 			this.passwordField.MaxLength = 32767;
 			this.passwordField.Name = "passwordField";
 			this.passwordField.PasswordChar = '●';
-			this.passwordField.PromptText = "Password";
+			this.passwordField.WaterMark = "Password";
 			this.passwordField.ScrollBars = System.Windows.Forms.ScrollBars.None;
 			this.passwordField.SelectedText = "";
 			this.passwordField.Size = new System.Drawing.Size(277, 23);

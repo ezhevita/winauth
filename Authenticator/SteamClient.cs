@@ -16,13 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using NLog;
 
@@ -48,15 +55,6 @@ namespace WinAuth
 		/// Default mobile user agent
 		/// </summary>
 		private const string USERAGENT = "Mozilla/5.0 (Linux; U; Android 4.1.1; en-us; Google Nexus 4 - 4.1.1 - API 16 - 768x1280 Build/JRO03S) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
-
-		/// <summary>
-		/// Regular expressions for trade confirmations
-		/// </summary>
-		private static Regex _tradesRegex = new Regex("\"mobileconf_list_entry\"(.*?)>(.*?)\"mobileconf_list_entry_sep\"", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-		private static Regex _tradeConfidRegex = new Regex(@"data-confid\s*=\s*""([^""]+)""", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-		private static Regex _tradeKeyRegex = new Regex(@"data-key\s*=\s*""([^""]+)""", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-		private static Regex _tradePlayerRegex = new Regex("\"mobileconf_list_entry_icon\"(.*?)src=\"([^\"]+)\"", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-		private static Regex _tradeDetailsRegex = new Regex("\"mobileconf_list_entry_description\".*?<div>([^<]*)</div>[^<]*<div>([^<]*)</div>[^<]*<div>([^<]*)</div>[^<]*</div>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Number of Confirmation retries
@@ -189,12 +187,62 @@ namespace WinAuth
 		{
 			public string Id;
 			public string Key;
-			public bool Offline;
 			public bool IsNew;
 			public string Image;
 			public string Details;
 			public string Traded;
 			public string When;
+		}
+
+		public class ConfirmationData
+		{
+			[JsonProperty(PropertyName = "id")]
+			public ulong ID { get; set; }
+
+			[JsonProperty(PropertyName = "nonce")]
+			public ulong Key { get; set; }
+
+			[JsonProperty(PropertyName = "creation_time")]
+			public uint CreationTime { get; set; }
+
+			[JsonProperty(PropertyName = "creator_id")]
+			public ulong Creator { get; set; }
+
+			[JsonProperty(PropertyName = "type")]
+			[JsonConverter(typeof(StringEnumConverter))]
+			public ConfirmationType ConfType { get; set; } = ConfirmationType.Unknown;
+
+			[JsonProperty(PropertyName = "type_name")]
+			public string ConfirmationTypeName { get; set; }
+
+			[JsonProperty(PropertyName = "icon")]
+			public string Icon { get; set; }
+
+			[JsonProperty(PropertyName = "summary")]
+			public string[] Summary { get; set; }
+
+			[JsonProperty(PropertyName = "headline")]
+			public string Headline { get; set; }
+
+			public enum ConfirmationType
+			{
+				GenericConfirmation,
+				Trade,
+				MarketSellTransaction,
+				Unknown
+			}
+		}
+
+		public class ConfirmationsResponse
+		{
+			[JsonProperty("success")]
+			public bool Success { get; set; }
+
+			[JsonProperty("needauth")]
+			public bool NeedAuthentication { get; set; }
+
+			[JsonProperty("conf")]
+			public ConfirmationData[] Confirmations { get; set; }
 		}
 
 		/// <summary>
@@ -212,20 +260,10 @@ namespace WinAuth
 			/// </summary>
 			public CookieContainer Cookies;
 
-			/// <summary>
-			/// Authorization token
-			/// </summary>
-			public string OAuthToken;
+			public string SteamLoginSecure;
 
-			/// <summary>
-			/// UMQ id
-			/// </summary>
-			public string UmqId;
-
-			/// <summary>
-			/// Message id
-			/// </summary>
-			public int MessageId;
+			public string WebCookie;
+			public string SessionID;
 
 			/// <summary>
 			/// Current polling state
@@ -264,8 +302,6 @@ namespace WinAuth
 			/// </summary>
 			public void Clear()
 			{
-				OAuthToken = null;
-				UmqId = null;
 				Cookies = new CookieContainer();
 				Confirmations = null;
 			}
@@ -278,7 +314,6 @@ namespace WinAuth
 			{
 				return "{\"steamid\":\"" + (SteamId ?? string.Empty) + "\","
 					+ "\"cookies\":\"" + Cookies.GetCookieHeader(new Uri(COMMUNITY_BASE + "/")) + "\","
-					+ "\"oauthtoken\":\"" + (OAuthToken ?? string.Empty) + "\","
 					// + "\"umqid\":\"" + (this.UmqId ?? string.Empty) + "\","
 					+ "\"confs\":" + (Confirmations != null ? Confirmations.ToString() : "null")
 					+ "}";
@@ -309,11 +344,6 @@ namespace WinAuth
 						Cookies.Add(uri, new Cookie(match.Groups[1].Value.Trim(), match.Groups[2].Value.Trim()));
 						match = match.NextMatch();
 					}
-				}
-				token = tokens.SelectToken("oauthtoken");
-				if (token != null)
-				{
-					OAuthToken = token.Value<string>();
 				}
 				//token = tokens.SelectToken("umqid");
 				//if (token != null)
@@ -353,7 +383,7 @@ namespace WinAuth
 		/// <summary>
 		/// Saved Html from GetConfirmations used as template for GetDetails
 		/// </summary>
-		private string ConfirmationsHtml;
+		private string ConfirmationsData;
 
 		/// <summary>
 		/// Query string from GetConfirmations used in GetDetails
@@ -453,7 +483,7 @@ namespace WinAuth
 		/// <returns></returns>
 		public bool IsLoggedIn()
 		{
-			return (Session != null && string.IsNullOrEmpty(Session.OAuthToken) == false);
+			return false;
 		}
 
 		/// <summary>
@@ -535,8 +565,10 @@ namespace WinAuth
 				data.Add("remember_login", "false");
 				data.Add("oauth_client_id", "DE45CD61");
 				data.Add("oauth_scope", "read_profile write_profile read_client write_client");
-				data.Add("donotache", new DateTime().ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds.ToString());
+				data.Add("donotcache", new DateTime().ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds.ToString());
 				response = GetString(COMMUNITY_BASE + "/mobilelogin/dologin/", "POST", data);
+
+				Logger.Error(response);
 				Dictionary<string, object> loginresponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(response);
 
 				if (loginresponse.ContainsKey("emailsteamid"))
@@ -552,7 +584,7 @@ namespace WinAuth
 				EmailDomain = null;
 				Requires2FA = false;
 
-				if (loginresponse.ContainsKey("login_complete") == false || (bool)loginresponse["login_complete"] == false || loginresponse.ContainsKey("oauth") == false)
+				if (loginresponse.ContainsKey("login_complete") == false || (bool)loginresponse["login_complete"] == false || loginresponse.ContainsKey("transfer_parameters") == false)
 				{
 					InvalidLogin = true;
 
@@ -592,28 +624,9 @@ namespace WinAuth
 					return false;
 				}
 
-				// get the OAuth token
-				string oauth = (string)loginresponse["oauth"];
-				var oauthjson = JObject.Parse(oauth);
-				Session.OAuthToken = oauthjson.SelectToken("oauth_token").Value<string>();
-				if (oauthjson.SelectToken("steamid") != null)
-				{
-					Session.SteamId = oauthjson.SelectToken("steamid").Value<string>();
-				}
-
-				//// perform UMQ login
-				//data.Clear();
-				//data.Add("access_token", this.Session.OAuthToken);
-				//response = GetString(API_LOGON, "POST", data);
-				//loginresponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(response);
-				//if (loginresponse.ContainsKey("umqid") == true)
-				//{
-				//	this.Session.UmqId = (string)loginresponse["umqid"];
-				//	if (loginresponse.ContainsKey("message") == true)
-				//	{
-				//		this.Session.MessageId = Convert.ToInt32(loginresponse["message"]);
-				//	}
-				//}
+				var transferParametersJson = (JToken)loginresponse["transfer_parameters"];
+				Session.SteamId = transferParametersJson.SelectToken("steamid").Value<string>();
+				Session.SteamLoginSecure = transferParametersJson.SelectToken("token_secure").Value<string>();
 			}
 
 			return true;
@@ -624,19 +637,6 @@ namespace WinAuth
 		/// </summary>
 		public void Logout()
 		{
-			if (string.IsNullOrEmpty(Session.OAuthToken) == false)
-			{
-				PollConfirmationsStop();
-
-				if (string.IsNullOrEmpty(Session.UmqId) == false)
-				{
-					var data = new NameValueCollection();
-					data.Add("access_token", Session.OAuthToken);
-					data.Add("umqid", Session.UmqId);
-					GetString(API_LOGOFF, "POST", data);
-				}
-			}
-
 			Clear();
 		}
 
@@ -646,80 +646,7 @@ namespace WinAuth
 		/// <returns>true if successful</returns>
 		public bool Refresh()
 		{
-			try
-			{
-				var data = new NameValueCollection();
-				data.Add("access_token", Session.OAuthToken);
-				string response = GetString(API_GETWGTOKEN, "POST", data);
-				if (string.IsNullOrEmpty(response))
-				{
-					return false;
-				}
-
-				var json = JObject.Parse(response);
-				var token = json.SelectToken("response.token");
-				if (token == null)
-				{
-					return false;
-				}
-
-				var cookieuri = new Uri(COMMUNITY_BASE + "/");
-				Session.Cookies.Add(cookieuri, new Cookie("steamLogin", Session.SteamId + "||" + token.Value<string>()));
-
-				token = json.SelectToken("response.token_secure");
-				if (token == null)
-				{
-					return false;
-				}
-				Session.Cookies.Add(cookieuri, new Cookie("steamLoginSecure", Session.SteamId + "||" + token.Value<string>()));
-
-				// perform UMQ login
-				//response = GetString(API_LOGON, "POST", data);
-				//var loginresponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(response);
-				//if (loginresponse.ContainsKey("umqid") == true)
-				//{
-				//	this.Session.UmqId = (string)loginresponse["umqid"];
-				//	if (loginresponse.ContainsKey("message") == true)
-				//	{
-				//		this.Session.MessageId = Convert.ToInt32(loginresponse["message"]);
-				//	}
-				//}
-
-				return true;
-			}
-			catch (Exception)
-			{
-				return false;
-			}
-		}
-
-		/// <summary>
-		/// Perform a UMQ login
-		/// </summary>
-		/// <returns></returns>
-		private bool UmqLogin()
-		{
-			if (IsLoggedIn() == false)
-			{
-				return false;
-			}
-
-			var data = new NameValueCollection();
-			data.Add("access_token", Session.OAuthToken);
-			var response = GetString(API_LOGON, "POST", data);
-			var loginresponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(response);
-			if (loginresponse.ContainsKey("umqid"))
-			{
-				Session.UmqId = (string)loginresponse["umqid"];
-				if (loginresponse.ContainsKey("message"))
-				{
-					Session.MessageId = Convert.ToInt32(loginresponse["message"]);
-				}
-
-				return true;
-			}
-
-			return false;
+			return true;
 		}
 
 		/// <summary>
@@ -916,57 +843,29 @@ namespace WinAuth
 			data.Add("m", "android");
 			data.Add("tag", "conf");
 
-			string html = GetString(COMMUNITY_BASE + "/mobileconf/conf", "GET", data);
+			string json = GetString(COMMUNITY_BASE + "/mobileconf/getlist", "GET", data);
 
 			// save last html for confirmations details
-			ConfirmationsHtml = html;
+			ConfirmationsData = json;
 			ConfirmationsQuery = string.Join("&", Array.ConvertAll(data.AllKeys, key => String.Format("{0}={1}", HttpUtility.UrlEncode(key), HttpUtility.UrlEncode(data[key]))));
 
 			List<Confirmation> trades = new List<Confirmation>();
 
-			// extract the trades
-			Match match = _tradesRegex.Match(html);
-			while (match.Success)
-			{
-				var tradeIds = match.Groups[1].Value;
+			var confirmationsResponse = JsonConvert.DeserializeObject<ConfirmationsResponse>(json);
 
-				var trade = new Confirmation();
-
-				var innerMatch = _tradeConfidRegex.Match(tradeIds);
-				if (innerMatch.Success)
-				{
-					trade.Id = innerMatch.Groups[1].Value;
-				}
-				innerMatch = _tradeKeyRegex.Match(tradeIds);
-				if (innerMatch.Success)
-				{
-					trade.Key = innerMatch.Groups[1].Value;
-				}
-
-				var traded = match.Groups[2].Value;
-
-				innerMatch = _tradePlayerRegex.Match(traded);
-				if (innerMatch.Success)
-				{
-					if (innerMatch.Groups[1].Value.IndexOf("offline") != -1)
+			trades.AddRange(
+				confirmationsResponse.Confirmations.Select(
+					x => new Confirmation
 					{
-						trade.Offline = true;
+						Id = x.ID.ToString(),
+						Key = x.Key.ToString(),
+						Image = x.Icon,
+						Traded = string.Join(", ", x.Summary),
+						Details = x.ConfirmationTypeName + ": " + x.Headline,
+						When = DateTimeOffset.FromUnixTimeSeconds(x.CreationTime).ToString("F")
 					}
-					trade.Image = innerMatch.Groups[2].Value;
-				}
-
-				innerMatch = _tradeDetailsRegex.Match(traded);
-				if (innerMatch.Success)
-				{
-					trade.Details = innerMatch.Groups[1].Value;
-					trade.Traded = innerMatch.Groups[2].Value;
-					trade.When = innerMatch.Groups[3].Value;
-				}
-
-				trades.Add(trade);
-
-				match = match.NextMatch();
-			}
+				)
+			);
 
 			if (Session.Confirmations != null)
 			{
@@ -1005,27 +904,7 @@ namespace WinAuth
 		/// <returns>html string of details</returns>
 		public string GetConfirmationDetails(Confirmation trade)
 		{
-			// build details URL
-			string url = COMMUNITY_BASE + "/mobileconf/details/" + trade.Id + "?" + ConfirmationsQuery;
-
-			string response = GetString(url);
-			if (response.IndexOf("success") == -1)
-			{
-				throw new InvalidSteamRequestException("Invalid request from steam: " + response);
-			}
-			if (JObject.Parse(response).SelectToken("success").Value<bool>())
-			{
-				string html = JObject.Parse(response).SelectToken("html").Value<string>();
-
-				Regex detailsRegex = new Regex(@"(.*<body[^>]*>\s*<div\s+class=""[^""]+"">).*(</div>.*?</body>\s*</html>)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-				var match = detailsRegex.Match(ConfirmationsHtml);
-				if (match.Success)
-				{
-					return match.Groups[1].Value + html + match.Groups[2].Value;
-				}
-			}
-
-			return "<html><head></head><body><p>Cannot load trade confirmation details</p></body></html>";
+			return $"<html><head></head><body><p>{trade.Traded}</p></body></html>";
 		}
 
 		/// <summary>
@@ -1037,11 +916,6 @@ namespace WinAuth
 		/// <returns>true if successful</returns>
 		public bool ConfirmTrade(string id, string key, bool accept)
 		{
-			if (string.IsNullOrEmpty(Session.OAuthToken))
-			{
-				return false;
-			}
-
 			long servertime = (WinAuth.Authenticator.CurrentTime + Authenticator.ServerTimeDiff) / 1000L;
 
 			var jids = JObject.Parse(Authenticator.SteamData).SelectToken("identity_secret");

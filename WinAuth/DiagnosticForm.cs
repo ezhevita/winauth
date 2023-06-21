@@ -62,7 +62,7 @@ namespace WinAuth
 			// build data
 			try
 			{
-				dataText.Text = WinAuthHelper.PGPEncrypt(BuildDiagnostics(), WinAuthHelper.WINAUTH_PGP_PUBLICKEY);
+				dataText.Text = BuildDiagnostics(); //WinAuthHelper.PGPEncrypt(BuildDiagnostics(), WinAuthHelper.WINAUTH_PGP_PUBLICKEY);
 			}
 			catch (Exception ex)
 			{

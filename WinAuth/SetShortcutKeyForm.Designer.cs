@@ -267,7 +267,7 @@ namespace WinAuth
 			this.injectTextbox.MaxLength = 32767;
 			this.injectTextbox.Name = "injectTextbox";
 			this.injectTextbox.PasswordChar = '\0';
-			this.injectTextbox.PromptText = "Window title or process name";
+			this.injectTextbox.WaterMark = "Window title or process name";
 			this.injectTextbox.ScrollBars = System.Windows.Forms.ScrollBars.None;
 			this.injectTextbox.SelectedText = "";
 			this.injectTextbox.Size = new System.Drawing.Size(315, 23);

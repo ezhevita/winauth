@@ -1,4 +1,6 @@
-﻿namespace WindowsInput
+﻿using System;
+
+namespace WindowsInput
 {
 #pragma warning disable 649
     /// <summary>

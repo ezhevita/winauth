@@ -92,7 +92,7 @@ namespace WinAuth
 				{
 					if (c is MetroTextBox)
 					{
-						((MetroTextBox)c).PromptText = text;
+						((MetroTextBox)c).WaterMark = text;
 					}
 					else
 					{

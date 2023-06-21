@@ -5,8 +5,9 @@
     <AssemblyName>WinAuth</AssemblyName>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net481</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +22,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NLog" Version="5.2.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
+    <PackageReference Include="System.Resources.Extensions" Version="7.0.0" />
     <PackageReference Include="ZXing.Net" Version="0.14.0.1" />
   </ItemGroup>
 
@@ -128,6 +130,11 @@
     <EmbeddedResource Include="Resources\ChromeIcon.png" />
     <EmbeddedResource Include="Resources\OktaVerifyAuthenticatorIcon.png" />
     <Content Include="winauth.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Web">
+      <HintPath>..\..\..\.nuget\packages\microsoft.netframework.referenceassemblies.net481\1.0.3\build\.NETFramework\v4.8.1\System.Web.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

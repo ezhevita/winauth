@@ -247,13 +247,13 @@ namespace WinAuth
 						process.Refresh();
 
 						var hwnd = process.MainWindowHandle;
-						if (hwnd == 0)
+						if (hwnd == IntPtr.Zero)
 						{
 							hwnd = WinAPI.FindWindow(null, APPLICATION_TITLE);
 						}
 
 						// send it the open message
-						WinAPI.SendMessage(hwnd, WinAPI.WM_USER + 1, 0, 0);
+						WinAPI.SendMessage(hwnd, WinAPI.WM_USER + 1, 0, IntPtr.Zero);
 						return;
 					}
 				}
