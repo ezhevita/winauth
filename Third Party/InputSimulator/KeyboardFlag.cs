@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace WindowsInput
+﻿namespace WindowsInput
 {
     /// <summary>
     /// Specifies various aspects of a keystroke. This member can be certain combinations of the following values.

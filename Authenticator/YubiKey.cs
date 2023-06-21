@@ -16,20 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Reflection;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Security.Cryptography;
-using System.Resources;
-using System.Threading;
 
 namespace WinAuth
 {
@@ -119,7 +107,7 @@ namespace WinAuth
 		/// <summary>
 		/// Array of valid product IDs
 		/// </summary>
-		public static int[] DEVICE_IDS = new int[] {
+		public static int[] DEVICE_IDS = {
 			YUBIKEY_PID,
 			NEO_OTP_PID,
 			NEO_OTP_CCID_PID,
@@ -168,14 +156,14 @@ namespace WinAuth
 			public byte VersionBuild;
 			public byte PgmSeq;		/* Programming sequence number. 0 if no valid configuration */
 			public UInt16 TouchLevel;	/* Level from touch detector */
-		};
+		}
 		public struct INFO
 		{
 			public STATUS Status;
 			public UInt32 Serial;
 			public UInt32 Pid;
 			public string Error;
-		};
+		}
 
 		/// <summary>
 		/// Handle to loaded pinvoke library
@@ -267,7 +255,7 @@ namespace WinAuth
 				_library = IntPtr.Zero;
 			}
 			// delete temp library file
-			if (string.IsNullOrEmpty(_libraryPath) == false && File.Exists(_libraryPath) == true)
+			if (string.IsNullOrEmpty(_libraryPath) == false && File.Exists(_libraryPath))
 			{
 				try
 				{
@@ -436,7 +424,7 @@ namespace WinAuth
 			byte[] maxhash = new byte[64];
 			ChallengeResponseDelegate f = GetFunction<ChallengeResponseDelegate>("ChallengeResponse");
 			int hashret = f(slot, allowBlock, challenge, challenge.Length, maxhash, maxhash.Length);
-			if (hashret != 0) 
+			if (hashret != 0)
 			{
 				int lasterror = LastError();
 				throw new ChallengeResponseException(string.Format("Cannot perform ChallengeResponse. Error {0}:{1}.", hashret, lasterror));

@@ -17,23 +17,12 @@
  */
 
 using System;
-using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
-using System.Deployment.Application;
-using System.Globalization;
-using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
-using System.Xml.XPath;
-using System.Windows;
-using System.Windows.Forms;
-
-using WinAuth.Resources;
 
 namespace WinAuth
 {
@@ -130,32 +119,22 @@ namespace WinAuth
 
 			// read the update interval and last known latest version from the registry
 			TimeSpan interval;
-			if (TimeSpan.TryParse(Config.ReadSetting(WINAUTHREGKEY_CHECKFREQUENCY, string.Empty), out interval) == true)
+			if (TimeSpan.TryParse(Config.ReadSetting(WINAUTHREGKEY_CHECKFREQUENCY, string.Empty), out interval))
 			{
 				_autocheckInterval = interval;
 			}
 
 			long lastCheck = 0;
-			if (long.TryParse(Config.ReadSetting(WINAUTHREGKEY_LASTCHECK, null), out lastCheck) == true)
+			if (long.TryParse(Config.ReadSetting(WINAUTHREGKEY_LASTCHECK), out lastCheck))
 			{
 				_lastCheck = new DateTime(lastCheck);
 			}
 
 			Version version;
-#if NETFX_4
-			if (Version.TryParse(Config.ReadSetting(WINAUTHREGKEY_LATESTVERSION, string.Empty), out version) == true)
+			if (Version.TryParse(Config.ReadSetting(WINAUTHREGKEY_LATESTVERSION, string.Empty), out version))
 			{
 				_latestVersion = version;
 			}
-#endif
-#if NETFX_3
-			try
-			{
-				version = new Version(Config.ReadSetting(WINAUTHREGKEY_LATESTVERSION, string.Empty));
-				_latestVersion = version;
-			}
-			catch (Exception) { }
-#endif
 		}
 
 		#region Properties
@@ -194,22 +173,11 @@ namespace WinAuth
 			get
 			{
 				Version version;
-#if NETFX_4
 				if (Version.TryParse(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion, out version) == false)
 				{
 					throw new InvalidOperationException("Cannot get Assembly version information");
 				}
-#endif
-#if NETFX_3
-				try
-				{
-					version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-				}
-				catch (Exception)
-				{
-					throw new InvalidOperationException("Cannot get Assembly version information");
-				}
-#endif
+
 				return version;
 			}
 		}
@@ -245,7 +213,7 @@ namespace WinAuth
 		public void AutoCheck(Action<Version> callback)
 		{
 			// create a thread to check for latest version
-			Thread thread = new Thread(new ParameterizedThreadStart(AutoCheckPoller));
+			Thread thread = new Thread(AutoCheckPoller);
 			thread.IsBackground = true;
 			thread.Priority = ThreadPriority.BelowNormal;
 			thread.Start(callback);
@@ -262,9 +230,9 @@ namespace WinAuth
 			do
 			{
 				// only if autochecking is on, and is due, and we don't already have a later version
-				if (this.IsAutoCheck == true
+				if (IsAutoCheck
 					&& _autocheckInterval.HasValue && _lastCheck.Add(_autocheckInterval.Value) < DateTime.Now
-					&& (LastKnownLatestVersion == null || LastKnownLatestVersion <= this.CurrentVersion))
+					&& (LastKnownLatestVersion == null || LastKnownLatestVersion <= CurrentVersion))
 				{
 					// update the last check time
 					_lastCheck = DateTime.Now;
@@ -274,7 +242,7 @@ namespace WinAuth
 					try
 					{
 						var latest = GetLatestVersion();
-						if (latest != null && latest.Version > this.CurrentVersion)
+						if (latest != null && latest.Version > CurrentVersion)
 						{
 							callback(latest.Version);
 						}
@@ -298,7 +266,7 @@ namespace WinAuth
 			string updateUrl = WinAuthMain.WINAUTH_UPDATE_URL;
 			try
 			{
-				var settings = new System.Configuration.AppSettingsReader();
+				var settings = new AppSettingsReader();
 				string appvalue = settings.GetValue("UpdateCheckUrl", typeof(string)) as string;
 				if (string.IsNullOrEmpty(appvalue) == false)
 				{
@@ -310,7 +278,7 @@ namespace WinAuth
 			{
 				using (WebClient web = new WebClient())
 				{
-					web.Headers.Add("User-Agent", "WinAuth-" + this.CurrentVersion.ToString());
+					web.Headers.Add("User-Agent", "WinAuth-" + CurrentVersion);
 					if (callback == null)
 					{
 						// immediate request
@@ -324,13 +292,10 @@ namespace WinAuth
 						}
 						return latestVersion;
 					}
-					else
-					{
-						// initiate async operation
-						web.DownloadStringCompleted += new DownloadStringCompletedEventHandler(GetLatestVersionDownloadCompleted);
-						web.DownloadStringAsync(new Uri(updateUrl), callback);
-						return null;
-					}
+					// initiate async operation
+					web.DownloadStringCompleted += GetLatestVersionDownloadCompleted;
+					web.DownloadStringAsync(new Uri(updateUrl), callback);
+					return null;
 				}
 			}
 			catch (Exception )
@@ -355,7 +320,7 @@ namespace WinAuth
 			}
 
 			// report cancelled or error
-			if (args.Cancelled == true || args.Error != null)
+			if (args.Cancelled || args.Error != null)
 			{
 				callback(null, args.Cancelled, args.Error);
 				return;
@@ -394,32 +359,21 @@ namespace WinAuth
 			var node = xml.SelectSingleNode("//version");
 
 			Version version = null;
-#if NETFX_4
 			Version.TryParse(node.InnerText, out version);
-#endif
-#if NETFX_3
-			try
-			{
-				version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-			}
-			catch (Exception) { }
-#endif
+
 			if (node != null && version != null)
 			{
 				WinAuthVersionInfo latestversion = new WinAuthVersionInfo(version);
 
 				DateTime released;
 				node = xml.SelectSingleNode("//released");
-				if (node != null && DateTime.TryParse(node.InnerText, out released) == true)
+				if (node != null && DateTime.TryParse(node.InnerText, out released))
 				{
 					latestversion.Released = released;
 				}
-#if NETFX_4
+
 				node = xml.SelectSingleNode("//url");
-#endif
-#if NETFX_3
-				node = xml.SelectSingleNode("//url35");
-#endif
+
 				if (node != null && string.IsNullOrEmpty(node.InnerText) == false)
 				{
 					latestversion.Url = node.InnerText;
@@ -432,10 +386,8 @@ namespace WinAuth
 
 				return latestversion;
 			}
-			else
-			{
-				throw new InvalidOperationException("Invalid return data");
-			}
+
+			throw new InvalidOperationException("Invalid return data");
 		}
 
 		/// <summary>
@@ -448,7 +400,7 @@ namespace WinAuth
 			if (interval != null)
 			{
 				// write into regisry
-				
+
 				Config.WriteSetting(WINAUTHREGKEY_CHECKFREQUENCY, string.Format("{0}:{1:00}:{2:00}", interval.Value.TotalHours, interval.Value.Minutes, interval.Value.Seconds)); // toString("c") is Net4
 
 				// if last update not set, set to now

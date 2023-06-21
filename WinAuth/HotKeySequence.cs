@@ -17,8 +17,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -82,13 +80,13 @@ namespace WinAuth
 			if (string.IsNullOrEmpty(data) == false)
 			{
 				Match match = Regex.Match(data, @"([0-9a-fA-F]{8})([0-9a-fA-F]{4})\t([^\t]*)\t(Y|N)(.*)", RegexOptions.Multiline);
-				if (match.Success == true)
+				if (match.Success)
 				{
 					Modifiers = (WinAPI.KeyModifiers)BitConverter.ToInt32(Authenticator.StringToByteArray(match.Groups[1].Value), 0);
 					HotKey = (WinAPI.VirtualKeyCode)BitConverter.ToUInt16(Authenticator.StringToByteArray(match.Groups[2].Value), 0);
 					WindowTitle = match.Groups[3].Value;
 					Advanced = (match.Groups[4].Value == "Y");
-					if (Advanced == true)
+					if (Advanced)
 					{
 						AdvancedScript = match.Groups[5].Value;
 					}
@@ -119,7 +117,7 @@ namespace WinAuth
 				WindowTitle = node.InnerText;
 			}
 			node = autoLoginNode.SelectSingleNode("windowtitleregex");
-			if (node != null && bool.TryParse(node.InnerText, out boolVal) == true)
+			if (node != null && bool.TryParse(node.InnerText, out boolVal))
 			{
 				WindowTitleRegex = boolVal;
 			}
@@ -129,7 +127,7 @@ namespace WinAuth
 				ProcessName = node.InnerText;
 			}
 			node = autoLoginNode.SelectSingleNode("advanced");
-			if (node != null && bool.TryParse(node.InnerText, out boolVal) == true)
+			if (node != null && bool.TryParse(node.InnerText, out boolVal))
 			{
 				Advanced = boolVal;
 			}
@@ -167,7 +165,7 @@ namespace WinAuth
 							case 'y':
 								{
 									// we use an explicit password to encrypt data
-									if (string.IsNullOrEmpty(password) == true)
+									if (string.IsNullOrEmpty(password))
 									{
 										throw new EncryptedSecretDataException();
 									}
@@ -176,8 +174,6 @@ namespace WinAuth
 									data = Encoding.UTF8.GetString(plain, 0, plain.Length);
 									break;
 								}
-							default:
-								break;
 						}
 					}
 				}

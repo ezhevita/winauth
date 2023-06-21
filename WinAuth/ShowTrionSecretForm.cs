@@ -17,13 +17,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
 
 namespace WinAuth
 {
@@ -52,7 +45,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			this.Close();
+			Close();
 		}
 
 		/// <summary>
@@ -62,12 +55,12 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void ShowTrionSecretForm_Load(object sender, EventArgs e)
 		{
-			this.serialNumberField.SecretMode = true;
-			this.deviceIdField.SecretMode = true;
+			serialNumberField.SecretMode = true;
+			deviceIdField.SecretMode = true;
 
 			TrionAuthenticator authenticator = CurrentAuthenticator.AuthenticatorData as TrionAuthenticator;
-			this.serialNumberField.Text = authenticator.Serial;
-			this.deviceIdField.Text = authenticator.DeviceId;
+			serialNumberField.Text = authenticator.Serial;
+			deviceIdField.Text = authenticator.DeviceId;
 		}
 
 		/// <summary>
@@ -77,8 +70,8 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void allowCopyCheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-			this.serialNumberField.SecretMode = !allowCopyCheckBox.Checked;
-			this.deviceIdField.SecretMode = !allowCopyCheckBox.Checked;
+			serialNumberField.SecretMode = !allowCopyCheckBox.Checked;
+			deviceIdField.SecretMode = !allowCopyCheckBox.Checked;
 		}
 
 	}

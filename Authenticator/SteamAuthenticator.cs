@@ -16,35 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Collections.Specialized;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Cache;
 using System.Security.Cryptography;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using System.Xml;
-using System.Xml.Serialization;
-using System.Xml.XPath;
-
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Macs;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Paddings;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
-
-using NLog;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+using NLog;
+using Org.BouncyCastle.Crypto.Digests;
+using Org.BouncyCastle.Crypto.Macs;
+using Org.BouncyCastle.Crypto.Parameters;
 #if NUNIT
 using NUnit.Framework;
 #endif
@@ -100,7 +83,7 @@ namespace WinAuth
 		/// <summary>
 		/// Character set for authenticator code
 		/// </summary>
-		private static char[] STEAMCHARS = new char[] {
+		private static char[] STEAMCHARS = {
 				'2', '3', '4', '5', '6', '7', '8', '9', 'B', 'C',
 				'D', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q',
 				'R', 'T', 'V', 'W', 'X', 'Y'};
@@ -183,7 +166,7 @@ namespace WinAuth
 		/// <summary>
 		/// Expanding offsets to retry when creating first code
 		/// </summary>
-		private int[] ENROLL_OFFSETS = new int[] { 0, -30, 30, -60, 60, -90, 90, -120, 120};
+		private int[] ENROLL_OFFSETS = { 0, -30, 30, -60, 60, -90, 90, -120, 120};
 
 		/// <summary>
 		/// Create a new Authenticator object
@@ -201,9 +184,9 @@ namespace WinAuth
 		{
 			get
 			{
-				if (this.Client != null && this.Client.Session != null)
+				if (Client != null && Client.Session != null)
 				{
-					this.SessionData = this.Client.Session.ToString();
+					SessionData = Client.Session.ToString();
 				}
 
 				//if (Logger != null)
@@ -213,10 +196,10 @@ namespace WinAuth
 
 				// this is the key |  serial | deviceid
 				return base.SecretData
-					+ "|" + Authenticator.ByteArrayToString(Encoding.UTF8.GetBytes(Serial))
-					+ "|" + Authenticator.ByteArrayToString(Encoding.UTF8.GetBytes(DeviceId))
-					+ "|" + Authenticator.ByteArrayToString(Encoding.UTF8.GetBytes(SteamData))
-					+ "|" + (string.IsNullOrEmpty(SessionData) == false ? Authenticator.ByteArrayToString(Encoding.UTF8.GetBytes(SessionData)) : string.Empty);
+					+ "|" + ByteArrayToString(Encoding.UTF8.GetBytes(Serial))
+					+ "|" + ByteArrayToString(Encoding.UTF8.GetBytes(DeviceId))
+					+ "|" + ByteArrayToString(Encoding.UTF8.GetBytes(SteamData))
+					+ "|" + (string.IsNullOrEmpty(SessionData) == false ? ByteArrayToString(Encoding.UTF8.GetBytes(SessionData)) : string.Empty);
 			}
 			set
 			{
@@ -225,16 +208,16 @@ namespace WinAuth
 				{
 					string[] parts = value.Split('|');
 					base.SecretData = value;
-					Serial = (parts.Length > 1 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[1])) : null);
-					DeviceId = (parts.Length > 2 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[2])) : null);
-					SteamData = (parts.Length > 3 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[3])) : string.Empty);
+					Serial = (parts.Length > 1 ? Encoding.UTF8.GetString(StringToByteArray(parts[1])) : null);
+					DeviceId = (parts.Length > 2 ? Encoding.UTF8.GetString(StringToByteArray(parts[2])) : null);
+					SteamData = (parts.Length > 3 ? Encoding.UTF8.GetString(StringToByteArray(parts[3])) : string.Empty);
 
 					if (string.IsNullOrEmpty(SteamData) == false && SteamData[0] != '{')
 					{
 						// convert old recovation code into SteamData json
 						SteamData = "{\"revocation_code\":\"" + SteamData + "\"}";
 					}
-					string session = (parts.Length > 4 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[4])) : null);
+					string session = (parts.Length > 4 ? Encoding.UTF8.GetString(StringToByteArray(parts[4])) : null);
 
 					//if (Logger != null)
 					//{
@@ -265,12 +248,12 @@ namespace WinAuth
 		{
 			lock (this)
 			{
-				if (this.Client == null)
+				if (Client == null)
 				{
-					this.Client = new SteamClient(this, this.SessionData);
+					Client = new SteamClient(this, SessionData);
 				}
 
-				return this.Client;
+				return Client;
 			}
 		}
 
@@ -325,7 +308,7 @@ namespace WinAuth
 			try {
 				using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
 				{
-					LogRequest(method, url, cookies, data, response.StatusCode.ToString() + " " + response.StatusDescription);
+					LogRequest(method, url, cookies, data, response.StatusCode + " " + response.StatusDescription);
 
 					// OK?
 					if (response.StatusCode != HttpStatusCode.OK)
@@ -369,7 +352,7 @@ namespace WinAuth
 				var cookies = state.Cookies = state.Cookies ?? new CookieContainer();
 				string response;
 
-				if (string.IsNullOrEmpty(state.OAuthToken) == true)
+				if (string.IsNullOrEmpty(state.OAuthToken))
 				{
 					// get session
 					if (cookies.Count == 0)
@@ -407,8 +390,8 @@ namespace WinAuth
 					{
 						var passwordBytes = Encoding.ASCII.GetBytes(state.Password);
 						var p = rsa.ExportParameters(false);
-						p.Exponent = Authenticator.StringToByteArray(rsaresponse.SelectToken("publickey_exp").Value<string>());
-						p.Modulus = Authenticator.StringToByteArray(rsaresponse.SelectToken("publickey_mod").Value<string>());
+						p.Exponent = StringToByteArray(rsaresponse.SelectToken("publickey_exp").Value<string>());
+						p.Modulus = StringToByteArray(rsaresponse.SelectToken("publickey_mod").Value<string>());
 						rsa.ImportParameters(p);
 						encryptedPassword = rsa.Encrypt(passwordBytes, false);
 					}
@@ -431,13 +414,13 @@ namespace WinAuth
 					response = Request(COMMUNITY_BASE + "/mobilelogin/dologin/", "POST", data, cookies);
 					Dictionary<string, object> loginresponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(response);
 
-					if (loginresponse.ContainsKey("emailsteamid") == true)
+					if (loginresponse.ContainsKey("emailsteamid"))
 					{
 						state.SteamId = loginresponse["emailsteamid"] as string;
 					}
 
 					// require captcha
-					if (loginresponse.ContainsKey("captcha_needed") == true && (bool)loginresponse["captcha_needed"] == true)
+					if (loginresponse.ContainsKey("captcha_needed") && (bool)loginresponse["captcha_needed"])
 					{
 						state.RequiresCaptcha = true;
 						state.CaptchaId = (string)loginresponse["captcha_gid"];
@@ -452,9 +435,9 @@ namespace WinAuth
 					}
 
 					// require email auth
-					if (loginresponse.ContainsKey("emailauth_needed") == true && (bool)loginresponse["emailauth_needed"] == true)
+					if (loginresponse.ContainsKey("emailauth_needed") && (bool)loginresponse["emailauth_needed"])
 					{
-						if (loginresponse.ContainsKey("emaildomain") == true)
+						if (loginresponse.ContainsKey("emaildomain"))
 						{
 							var emaildomain = (string)loginresponse["emaildomain"];
 							if (string.IsNullOrEmpty(emaildomain) == false)
@@ -471,7 +454,7 @@ namespace WinAuth
 					}
 
 					// require email auth
-					if (loginresponse.ContainsKey("requires_twofactor") == true && (bool)loginresponse["requires_twofactor"] == true)
+					if (loginresponse.ContainsKey("requires_twofactor") && (bool)loginresponse["requires_twofactor"])
 					{
 						state.Requires2FA = true;
 					}
@@ -487,7 +470,7 @@ namespace WinAuth
 						{
 							state.Error = "Invalid response from Steam (No OAuth token)";
 						}
-						if (loginresponse.ContainsKey("message") == true)
+						if (loginresponse.ContainsKey("message"))
 						{
 							state.Error = (string)loginresponse["message"];
 						}
@@ -563,9 +546,9 @@ namespace WinAuth
 
 					// save data into this authenticator
 					var secret = tfaresponse.SelectToken("response.shared_secret").Value<string>();
-					this.SecretKey = Convert.FromBase64String(secret);
-					this.Serial = tfaresponse.SelectToken("response.serial_number").Value<string>();
-					this.DeviceId = deviceId;
+					SecretKey = Convert.FromBase64String(secret);
+					Serial = tfaresponse.SelectToken("response.serial_number").Value<string>();
+					DeviceId = deviceId;
 					state.RevocationCode = tfaresponse.SelectToken("response.revocation_code").Value<string>();
 
 					// add the steamid into the data
@@ -578,7 +561,7 @@ namespace WinAuth
 					{
 						steamdata.Add("steamguard_scheme", "2");
 					}
-					this.SteamData = steamdata.ToString(Newtonsoft.Json.Formatting.None);
+					SteamData = steamdata.ToString(Formatting.None);
 
 					// calculate server drift
 					long servertime = tfaresponse.SelectToken("response.server_time").Value<long>() * 1000;
@@ -598,10 +581,10 @@ namespace WinAuth
 
 				// try and authorise
 				var retries = 0;
-				while (state.RequiresActivation == true && retries < ENROLL_ACTIVATE_RETRIES)
+				while (state.RequiresActivation && retries < ENROLL_ACTIVATE_RETRIES)
 				{
-					data.Add("authenticator_code", this.CalculateCode(false));
-					data.Add("authenticator_time", this.ServerTime.ToString());
+					data.Add("authenticator_code", CalculateCode());
+					data.Add("authenticator_time", ServerTime.ToString());
 					response = Request(WEBAPI_BASE + "/ITwoFactorService/FinalizeAddAuthenticator/v0001", "POST", data);
 					var finalizeresponse = JObject.Parse(response);
 					if (response.IndexOf("status") != -1 && finalizeresponse.SelectToken("response.status").Value<int>() == INVALID_ACTIVATION_CODE)
@@ -619,11 +602,11 @@ namespace WinAuth
 					}
 
 					// check success
-					if (finalizeresponse.SelectToken("response.success").Value<bool>() == true)
+					if (finalizeresponse.SelectToken("response.success").Value<bool>())
 					{
-						if (response.IndexOf("want_more") != -1 && finalizeresponse.SelectToken("response.want_more").Value<bool>() == true)
+						if (response.IndexOf("want_more") != -1 && finalizeresponse.SelectToken("response.want_more").Value<bool>())
 						{
-							ServerTimeDiff += ((long)this.Period * 1000L);
+							ServerTimeDiff += (Period * 1000L);
 							retries++;
 							continue;
 						}
@@ -631,10 +614,10 @@ namespace WinAuth
 						break;
 					}
 
-					ServerTimeDiff += ((long)this.Period * 1000L);
+					ServerTimeDiff += (Period * 1000L);
 					retries++;
 				}
-				if (state.RequiresActivation == true)
+				if (state.RequiresActivation)
 				{
 					state.Error = "There was a problem activating. There might be an issue with the Steam servers. Please try again later.";
 					return false;
@@ -642,7 +625,7 @@ namespace WinAuth
 
 				// mark and successful and return key
 				state.Success = true;
-				state.SecretKey = Authenticator.ByteArrayToString(this.SecretKey);
+				state.SecretKey = ByteArrayToString(SecretKey);
 
 				// send confirmation email
 				data.Clear();
@@ -669,7 +652,7 @@ namespace WinAuth
 		public override void Sync()
 		{
 			// check if data is protected
-			if (this.SecretKey == null && this.EncryptedData != null)
+			if (SecretKey == null && EncryptedData != null)
 			{
 				throw new EncryptedSecretDataException();
 			}
@@ -713,11 +696,11 @@ namespace WinAuth
 		protected override string CalculateCode(bool resyncTime = false, long interval = -1)
 		{
 			// sync time if required
-			if (resyncTime == true || ServerTimeDiff == 0)
+			if (resyncTime || ServerTimeDiff == 0)
 			{
 				if (interval > 0)
 				{
-					ServerTimeDiff = (interval * ((long)this.Period * 1000L)) - CurrentTime;
+					ServerTimeDiff = (interval * (Period * 1000L)) - CurrentTime;
 				}
 				else
 				{
@@ -767,7 +750,7 @@ namespace WinAuth
 		/// <returns>Random string</returns>
 		private static string BuildRandomId()
 		{
-			return "android:" + Guid.NewGuid().ToString();
+			return "android:" + Guid.NewGuid();
 		}
 
 		/// <summary>

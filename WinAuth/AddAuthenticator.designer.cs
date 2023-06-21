@@ -1,3 +1,7 @@
+using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
 namespace WinAuth
 {
     partial class AddAuthenticator
@@ -5,7 +9,7 @@ namespace WinAuth
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -403,33 +407,33 @@ namespace WinAuth
 
         #endregion
 
-        private MetroFramework.Controls.MetroLabel step1Label;
-        private MetroFramework.Controls.MetroButton okButton;
-        private MetroFramework.Controls.MetroButton cancelButton;
-        private MetroFramework.Controls.MetroTextBox secretCodeField;
-        private MetroFramework.Controls.MetroLabel nameLabel;
-        private MetroFramework.Controls.MetroTextBox nameField;
-        private MetroFramework.Controls.MetroLabel step2Label;
-        private MetroFramework.Controls.MetroButton verifyButton;
-        private System.Windows.Forms.ProgressBar codeProgress;
+        private MetroLabel step1Label;
+        private MetroButton okButton;
+        private MetroButton cancelButton;
+        private MetroTextBox secretCodeField;
+        private MetroLabel nameLabel;
+        private MetroTextBox nameField;
+        private MetroLabel step2Label;
+        private MetroButton verifyButton;
+        private ProgressBar codeProgress;
         private SecretTextBox codeField;
-        private MetroFramework.Controls.MetroLabel step5Label;
-        private System.Windows.Forms.Timer timer;
-        private MetroFramework.Controls.MetroLabel step4TimerLabel;
-        private MetroFramework.Controls.MetroRadioButton timeBasedRadio;
-        private MetroFramework.Controls.MetroRadioButton counterBasedRadio;
-        private System.Windows.Forms.Panel timeBasedPanel;
-        private System.Windows.Forms.Panel counterBasedPanel;
-        private MetroFramework.Controls.MetroLabel step4CounterLabel;
-        private MetroFramework.Controls.MetroTextBox counterField;
-        private MetroFramework.Controls.MetroButton verifyCounterButton;
-        private MetroFramework.Controls.MetroComboBox hashField;
-    private MetroFramework.Controls.MetroTextBox intervalField;
-    private MetroFramework.Controls.MetroLabel labelTYpe;
-    private MetroFramework.Controls.MetroLabel hashLabel;
-    private MetroFramework.Controls.MetroLabel periodLabel;
-    private MetroFramework.Controls.MetroTextBox digitsField;
-    private MetroFramework.Controls.MetroLabel digitsLabel;
-    private MetroFramework.Controls.MetroLabel intervalLabelPost;
+        private MetroLabel step5Label;
+        private Timer timer;
+        private MetroLabel step4TimerLabel;
+        private MetroRadioButton timeBasedRadio;
+        private MetroRadioButton counterBasedRadio;
+        private Panel timeBasedPanel;
+        private Panel counterBasedPanel;
+        private MetroLabel step4CounterLabel;
+        private MetroTextBox counterField;
+        private MetroButton verifyCounterButton;
+        private MetroComboBox hashField;
+    private MetroTextBox intervalField;
+    private MetroLabel labelTYpe;
+    private MetroLabel hashLabel;
+    private MetroLabel periodLabel;
+    private MetroTextBox digitsField;
+    private MetroLabel digitsLabel;
+    private MetroLabel intervalLabelPost;
   }
 }

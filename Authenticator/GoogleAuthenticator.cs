@@ -16,25 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.Serialization;
-
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Macs;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Paddings;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
-
 #if NUNIT
 using NUnit.Framework;
 #endif
@@ -86,7 +68,7 @@ namespace WinAuth
     /// Create a new Authenticator object
     /// </summary>
     public GoogleAuthenticator()
-      : base(CODE_DIGITS)
+      : base()
     {
     }
 
@@ -104,7 +86,7 @@ namespace WinAuth
 		public override void Sync()
     {
 			// check if data is protected
-			if (this.SecretKey == null && this.EncryptedData != null)
+			if (SecretKey == null && EncryptedData != null)
 			{
 				throw new EncryptedSecretDataException();
 			}
@@ -135,7 +117,7 @@ namespace WinAuth
 					if (string.IsNullOrEmpty(headerdate) == false)
 					{
 						DateTime dt;
-						if (DateTime.TryParse(headerdate, out dt) == true)
+						if (DateTime.TryParse(headerdate, out dt))
 						{
 							// get as ms since epoch
 							long dtms = Convert.ToInt64((dt.ToUniversalTime() - new DateTime(1970, 1, 1)).TotalMilliseconds);

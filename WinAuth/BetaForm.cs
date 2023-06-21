@@ -17,11 +17,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace WinAuth
@@ -46,10 +42,10 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			if (this.ckAgree.Checked == true)
+			if (ckAgree.Checked)
 			{
-				this.DialogResult = System.Windows.Forms.DialogResult.OK;
-				this.Close();
+				DialogResult = DialogResult.OK;
+				Close();
 			}
 		}
 
@@ -70,8 +66,8 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void BetaForm_Load(object sender, EventArgs e)
 		{
-			Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-			this.Text = string.Format(this.Text, version.ToString(3), DateTime.Today.Year);
+			Version version = Assembly.GetExecutingAssembly().GetName().Version;
+			Text = string.Format(Text, version.ToString(3), DateTime.Today.Year);
 		}
 
 	}

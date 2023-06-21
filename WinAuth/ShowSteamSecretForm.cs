@@ -17,15 +17,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
-
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace WinAuth
@@ -55,7 +47,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			this.Close();
+			Close();
 		}
 
 		/// <summary>
@@ -65,26 +57,26 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void ShowSteamSecretForm_Load(object sender, EventArgs e)
 		{
-			this.revocationcodeField.SecretMode = true;
-			this.deviceidField.SecretMode = true;
-			this.steamdataField.SecretMode = false;
+			revocationcodeField.SecretMode = true;
+			deviceidField.SecretMode = true;
+			steamdataField.SecretMode = false;
 
 			SteamAuthenticator authenticator = CurrentAuthenticator.AuthenticatorData as SteamAuthenticator;
 
-			this.deviceidField.Text = authenticator.DeviceId;
+			deviceidField.Text = authenticator.DeviceId;
 			if (string.IsNullOrEmpty(authenticator.SteamData) == false && authenticator.SteamData[0] == '{')
 			{
-				this.revocationcodeField.Text = JObject.Parse(authenticator.SteamData).SelectToken("revocation_code").Value<string>();
+				revocationcodeField.Text = JObject.Parse(authenticator.SteamData).SelectToken("revocation_code").Value<string>();
 				if (authenticator.SteamData.IndexOf("shared_secret") != -1)
 				{
-					this.steamdataField.SecretMode = true;
-					this.steamdataField.Text = authenticator.SteamData;
-					this.steamdataField.ForeColor = SystemColors.ControlText;
+					steamdataField.SecretMode = true;
+					steamdataField.Text = authenticator.SteamData;
+					steamdataField.ForeColor = SystemColors.ControlText;
         }
 			}
 			else
 			{
-				this.revocationcodeField.Text = authenticator.SteamData;
+				revocationcodeField.Text = authenticator.SteamData;
 			}
 		}
 
@@ -95,9 +87,9 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void allowCopyCheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-			this.revocationcodeField.SecretMode = !allowCopyCheckBox.Checked;
-			this.deviceidField.SecretMode = !allowCopyCheckBox.Checked;
-			this.steamdataField.SecretMode = !allowCopyCheckBox.Checked;
+			revocationcodeField.SecretMode = !allowCopyCheckBox.Checked;
+			deviceidField.SecretMode = !allowCopyCheckBox.Checked;
+			steamdataField.SecretMode = !allowCopyCheckBox.Checked;
 		}
 
 	}

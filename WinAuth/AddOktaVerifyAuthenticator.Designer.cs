@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
     partial class AddOktaVerifyAuthenticator
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -288,24 +292,24 @@
 
         #endregion
 
-        private MetroFramework.Controls.MetroLabel setupLabel;
-        private MetroFramework.Controls.MetroButton okButton;
-        private MetroFramework.Controls.MetroButton cancelButton;
-        private MetroFramework.Controls.MetroTextBox secretCodeField;
-        private System.Windows.Forms.PictureBox oktaIcon;
-        private MetroFramework.Controls.MetroLabel iconLabel;
-        private MetroFramework.Controls.MetroLabel nameLabel;
-        private MetroFramework.Controls.MetroTextBox nameField;
-        private MetroFramework.Controls.MetroButton verifyAuthenticatorButton;
-        private System.Windows.Forms.ProgressBar newAuthenticatorProgress;
+        private MetroLabel setupLabel;
+        private MetroButton okButton;
+        private MetroButton cancelButton;
+        private MetroTextBox secretCodeField;
+        private PictureBox oktaIcon;
+        private MetroLabel iconLabel;
+        private MetroLabel nameLabel;
+        private MetroTextBox nameField;
+        private MetroButton verifyAuthenticatorButton;
+        private ProgressBar newAuthenticatorProgress;
         private SecretTextBox codeField;
-        private System.Windows.Forms.Timer newAuthenticatorTimer;
+        private Timer newAuthenticatorTimer;
         private GroupRadioButton iconRadioButton;
-        private MetroFramework.Controls.MetroLabel step8Label;
-        private MetroFramework.Controls.MetroLabel step9Label;
-        private System.Windows.Forms.LinkLabel linkLabel1;
-        private System.Windows.Forms.Label label1;
-        private MetroFramework.Controls.MetroLabel helpLabel;
-        private MetroFramework.Controls.MetroLink helpLink;
+        private MetroLabel step8Label;
+        private MetroLabel step9Label;
+        private LinkLabel linkLabel1;
+        private Label label1;
+        private MetroLabel helpLabel;
+        private MetroLink helpLink;
     }
 }

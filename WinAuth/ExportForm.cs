@@ -17,13 +17,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using WinAuth.Resources;
 
@@ -32,7 +26,7 @@ namespace WinAuth
 	/// <summary>
 	/// Form for exporting authenticators to a file
 	/// </summary>
-	public partial class ExportForm : WinAuth.ResourceForm
+	public partial class ExportForm : ResourceForm
 	{
 		/// <summary>
 		/// Create the form
@@ -82,14 +76,14 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void passwordCheckbox_CheckedChanged(object sender, EventArgs e)
 		{
-			if (passwordCheckbox.Checked == true)
+			if (passwordCheckbox.Checked)
 			{
 				pgpCheckbox.Checked = false;
 			}
 
 			passwordField.Enabled = (passwordCheckbox.Checked);
 			verifyField.Enabled = (passwordCheckbox.Checked);
-			if (passwordCheckbox.Checked == true)
+			if (passwordCheckbox.Checked)
 			{
 				passwordField.Focus();
 			}
@@ -102,13 +96,13 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void pgpCheckbox_CheckedChanged(object sender, EventArgs e)
 		{
-			if (pgpCheckbox.Checked == true)
+			if (pgpCheckbox.Checked)
 			{
 				passwordCheckbox.Checked = false;
 			}
 
 			pgpField.Enabled = pgpCheckbox.Checked;
-			if (pgpCheckbox.Checked == true)
+			if (pgpCheckbox.Checked)
 			{
 				pgpField.Focus();
 			}
@@ -126,9 +120,9 @@ namespace WinAuth
 			ofd.Filter = "All Files (*.*)|*.*";
 			ofd.Title = "Choose PGP Key File";
 
-			if (ofd.ShowDialog(this.Parent) == System.Windows.Forms.DialogResult.OK)
+			if (ofd.ShowDialog(Parent) == DialogResult.OK)
 			{
-				this.pgpField.Text = File.ReadAllText(ofd.FileName);
+				pgpField.Text = File.ReadAllText(ofd.FileName);
 			}
 		}
 
@@ -142,12 +136,12 @@ namespace WinAuth
 			SaveFileDialog sfd = new SaveFileDialog();
 			sfd.AddExtension = true;
 			sfd.CheckPathExists = true;
-			if (passwordCheckbox.Checked == true)
+			if (passwordCheckbox.Checked)
 			{
 				sfd.Filter = "Zip File (*.zip)|*.zip";
 				sfd.FileName = "winauth-" + DateTime.Today.ToString("yyyy-MM-dd") + ".zip";
 			}
-			else if (pgpCheckbox.Checked == true)
+			else if (pgpCheckbox.Checked)
 			{
 				sfd.Filter = "PGP File (*.pgp)|*.pgp";
 				sfd.FileName = "winauth-" + DateTime.Today.ToString("yyyy-MM-dd") + ".pgp";
@@ -158,12 +152,12 @@ namespace WinAuth
 				sfd.FileName = "winauth-" + DateTime.Today.ToString("yyyy-MM-dd") + ".txt";
 			}
 			sfd.OverwritePrompt = true;
-			if (sfd.ShowDialog(this.Parent) != System.Windows.Forms.DialogResult.OK)
+			if (sfd.ShowDialog(Parent) != DialogResult.OK)
 			{
 				return;
 			}
 
-			this.fileField.Text = sfd.FileName;
+			fileField.Text = sfd.FileName;
 		}
 
 		/// <summary>
@@ -174,42 +168,42 @@ namespace WinAuth
 		private void okButton_Click(object sender, EventArgs e)
 		{
 			// check password is set if required
-			if (passwordCheckbox.Checked == true && passwordField.Text.Trim().Length == 0)
+			if (passwordCheckbox.Checked && passwordField.Text.Trim().Length == 0)
 			{
 				WinAuthForm.ErrorDialog(this, strings.EnterPassword);
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
-			if (passwordCheckbox.Checked == true && string.Compare(passwordField.Text, verifyField.Text) != 0)
+			if (passwordCheckbox.Checked && string.Compare(passwordField.Text, verifyField.Text) != 0)
 			{
 				WinAuthForm.ErrorDialog(this, strings.PasswordsDontMatch);
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
 
-			if (pgpCheckbox.Checked == true && this.pgpField.Text.Length == 0)
+			if (pgpCheckbox.Checked && pgpField.Text.Length == 0)
 			{
 				WinAuthForm.ErrorDialog(this, strings.MissingPGPKey);
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
 
-			if (this.fileField.Text.Length == 0)
+			if (fileField.Text.Length == 0)
 			{
 				WinAuthForm.ErrorDialog(this, strings.MissingFile);
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
 
 			// set the valid password type property
-			this.ExportFile = this.fileField.Text;
-			if (this.passwordCheckbox.Checked && this.passwordField.Text.Length != 0)
+			ExportFile = fileField.Text;
+			if (passwordCheckbox.Checked && passwordField.Text.Length != 0)
 			{
-				this.Password = this.passwordField.Text;
+				Password = passwordField.Text;
 			}
-			if (this.pgpCheckbox.Checked && this.pgpField.Text.Length != 0)
+			if (pgpCheckbox.Checked && pgpField.Text.Length != 0)
 			{
-				this.PGPKey = this.pgpField.Text;
+				PGPKey = pgpField.Text;
 			}
 		}
 

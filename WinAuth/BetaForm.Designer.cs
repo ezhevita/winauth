@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using MetroFramework.Controls;
+
 namespace WinAuth
 {
 	partial class BetaForm
@@ -5,7 +8,7 @@ namespace WinAuth
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -103,9 +106,9 @@ namespace WinAuth
 
 		#endregion
 
-		private MetroFramework.Controls.MetroButton btnCancel;
-		private MetroFramework.Controls.MetroCheckBox ckAgree;
-		private MetroFramework.Controls.MetroButton btnOK;
-		private MetroFramework.Controls.MetroLabel betaLabel;
+		private MetroButton btnCancel;
+		private MetroCheckBox ckAgree;
+		private MetroButton btnOK;
+		private MetroLabel betaLabel;
 	}
 }

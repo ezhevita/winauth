@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class AddBattleNetAuthenticator
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -554,42 +558,42 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel newLabel1;
-		private WinAuth.SecretTextBox newRestoreCodeField;
-		private WinAuth.SecretTextBox newLoginCodeField;
-		private MetroFramework.Controls.MetroLabel label6;
-		private WinAuth.SecretTextBox newSerialNumberField;
-		private MetroFramework.Controls.MetroLabel label5;
-		private MetroFramework.Controls.MetroButton enrollAuthenticatorButton;
-		private MetroFramework.Controls.MetroLabel label4;
-		private MetroFramework.Controls.MetroLabel lnewLabel4;
-		private MetroFramework.Controls.MetroLabel label2;
-		private MetroFramework.Controls.MetroCheckBox allowCopyNewButton;
-		private MetroFramework.Controls.MetroTextBox restoreRestoreCodeField;
-		private MetroFramework.Controls.MetroLabel label7;
-		private MetroFramework.Controls.MetroTextBox restoreSerialNumberField;
-		private MetroFramework.Controls.MetroLabel label8;
-		private MetroFramework.Controls.MetroLabel label9;
-		private MetroFramework.Controls.MetroTextBox importPrivateKeyField;
-		private MetroFramework.Controls.MetroLabel label11;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private System.Windows.Forms.ProgressBar newAuthenticatorProgress;
-		private System.Windows.Forms.Timer newAuthenticatorTimer;
+		private MetroLabel newLabel1;
+		private SecretTextBox newRestoreCodeField;
+		private SecretTextBox newLoginCodeField;
+		private MetroLabel label6;
+		private SecretTextBox newSerialNumberField;
+		private MetroLabel label5;
+		private MetroButton enrollAuthenticatorButton;
+		private MetroLabel label4;
+		private MetroLabel lnewLabel4;
+		private MetroLabel label2;
+		private MetroCheckBox allowCopyNewButton;
+		private MetroTextBox restoreRestoreCodeField;
+		private MetroLabel label7;
+		private MetroTextBox restoreSerialNumberField;
+		private MetroLabel label8;
+		private MetroLabel label9;
+		private MetroTextBox importPrivateKeyField;
+		private MetroLabel label11;
+		private MetroButton okButton;
+		private MetroButton cancelButton;
+		private ProgressBar newAuthenticatorProgress;
+		private Timer newAuthenticatorTimer;
 		private GroupMetroRadioButton icon3RadioButton;
 		private GroupMetroRadioButton icon2RadioButton;
 		private GroupMetroRadioButton icon1RadioButton;
-		private System.Windows.Forms.PictureBox icon3;
-		private System.Windows.Forms.PictureBox icon2;
-		private System.Windows.Forms.PictureBox icon1;
-		private MetroFramework.Controls.MetroLabel label10;
-		private MetroFramework.Controls.MetroLabel label12;
-		private MetroFramework.Controls.MetroTextBox nameField;
-		private MetroFramework.Controls.MetroTabControl tabControl1;
-		private MetroFramework.Controls.MetroTabPage tabPage1;
-		private MetroFramework.Controls.MetroTabPage restoreAuthenticatorTab;
-		private MetroFramework.Controls.MetroTabPage importAuthenticatorTab;
-		private MetroFramework.Controls.MetroLabel label13;
-		private System.Windows.Forms.PictureBox pictureBox2;
+		private PictureBox icon3;
+		private PictureBox icon2;
+		private PictureBox icon1;
+		private MetroLabel label10;
+		private MetroLabel label12;
+		private MetroTextBox nameField;
+		private MetroTabControl tabControl1;
+		private MetroTabPage tabPage1;
+		private MetroTabPage restoreAuthenticatorTab;
+		private MetroTabPage importAuthenticatorTab;
+		private MetroLabel label13;
+		private PictureBox pictureBox2;
 	}
 }

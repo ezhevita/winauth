@@ -1,3 +1,7 @@
+using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
 namespace WinAuth
 {
 	partial class AddGuildWarsAuthenticator
@@ -5,7 +9,7 @@ namespace WinAuth
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -290,24 +294,24 @@ namespace WinAuth
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel step1Label;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroTextBox secretCodeField;
+		private MetroLabel step1Label;
+		private MetroButton okButton;
+		private MetroButton cancelButton;
+		private MetroTextBox secretCodeField;
 		private GroupMetroRadioButton icon2RadioButton;
 		private GroupMetroRadioButton icon1RadioButton;
-		private System.Windows.Forms.PictureBox icon2;
-		private System.Windows.Forms.PictureBox icon1;
-		private MetroFramework.Controls.MetroLabel iconLabel;
-		private MetroFramework.Controls.MetroLabel nameLabel;
-		private MetroFramework.Controls.MetroTextBox nameField;
-		private MetroFramework.Controls.MetroButton verifyAuthenticatorButton;
-		private MetroFramework.Controls.MetroLabel step7Label;
-		private System.Windows.Forms.ProgressBar newAuthenticatorProgress;
-		private MetroFramework.Controls.MetroCheckBox allowCopyButton;
+		private PictureBox icon2;
+		private PictureBox icon1;
+		private MetroLabel iconLabel;
+		private MetroLabel nameLabel;
+		private MetroTextBox nameField;
+		private MetroButton verifyAuthenticatorButton;
+		private MetroLabel step7Label;
+		private ProgressBar newAuthenticatorProgress;
+		private MetroCheckBox allowCopyButton;
 		private SecretTextBox codeField;
-		private MetroFramework.Controls.MetroLabel step8Label;
-		private System.Windows.Forms.Timer newAuthenticatorTimer;
-		private MetroFramework.Controls.MetroLabel step6Label;
+		private MetroLabel step8Label;
+		private Timer newAuthenticatorTimer;
+		private MetroLabel step6Label;
 	}
 }

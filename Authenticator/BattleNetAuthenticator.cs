@@ -16,25 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Configuration;
 using System.Net;
 using System.Security.Cryptography;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using System.Xml.Serialization;
-
 using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Macs;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Paddings;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
-
+using Org.BouncyCastle.Math;
 #if NUNIT
 using NUnit.Framework;
 #endif
@@ -183,7 +176,7 @@ namespace WinAuth
 			get
 			{
 				// for Battle.net, this is the key + serial
-				return base.SecretData + "|" + Authenticator.ByteArrayToString(Encoding.UTF8.GetBytes(Serial));
+				return base.SecretData + "|" + ByteArrayToString(Encoding.UTF8.GetBytes(Serial));
 			}
 			set
 			{
@@ -194,20 +187,20 @@ namespace WinAuth
 					if (parts.Length <= 1)
 					{
 						// old WinAuth2 version with secretdata + serial
-						SecretKey = Authenticator.StringToByteArray(value.Substring(0, 40));
-						Serial = Encoding.UTF8.GetString(Authenticator.StringToByteArray(value.Substring(40)));
+						SecretKey = StringToByteArray(value.Substring(0, 40));
+						Serial = Encoding.UTF8.GetString(StringToByteArray(value.Substring(40)));
 					}
 					else if (parts.Length == 3) // alpha 3.0.6
 					{
 						// secret|script|serial
 						base.SecretData = value;
-						Serial = (parts.Length > 2 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[2])) : null);
+						Serial = (parts.Length > 2 ? Encoding.UTF8.GetString(StringToByteArray(parts[2])) : null);
 					}
 					else
 					{
 						// secret|serial
 						base.SecretData = value;
-						Serial = (parts.Length > 1 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[1])) : null);
+						Serial = (parts.Length > 1 ? Encoding.UTF8.GetString(StringToByteArray(parts[1])) : null);
 					}
 				}
 				else
@@ -291,16 +284,16 @@ namespace WinAuth
 			{
 				// not worth a full json parser, just regex it
 				Match match = Regex.Match(responseString, ".*\"country\":\"([^\"]*)\".*", RegexOptions.IgnoreCase);
-				if (match.Success == true)
+				if (match.Success)
 				{
 					// match the correct region
 					country = match.Groups[1].Value.ToUpper();
 
-					if (EU_COUNTRIES.Contains(country) == true)
+					if (EU_COUNTRIES.Contains(country))
 					{
 						region = REGION_EU;
 					}
-					else if (KR_COUNTRIES.Contains(country) == true)
+					else if (KR_COUNTRIES.Contains(country))
 					{
 						region = REGION_KR;
 					}
@@ -316,7 +309,7 @@ namespace WinAuth
 			}
 
 			// allow override of country for CN using US from app.config
-			System.Configuration.AppSettingsReader config = new System.Configuration.AppSettingsReader();
+			AppSettingsReader config = new AppSettingsReader();
 			try
 			{
 				string configcountry = config.GetValue("BattleNetAuthenticator.Country", typeof(string)) as string;
@@ -353,7 +346,7 @@ namespace WinAuth
 
 			// encrypt the data with BMA public key
 			RsaEngine rsa = new RsaEngine();
-			rsa.Init(true, new RsaKeyParameters(false, new Org.BouncyCastle.Math.BigInteger(ENROLL_MODULUS, 16), new Org.BouncyCastle.Math.BigInteger(ENROLL_EXPONENT, 16)));
+			rsa.Init(true, new RsaKeyParameters(false, new BigInteger(ENROLL_MODULUS, 16), new BigInteger(ENROLL_EXPONENT, 16)));
 			byte[] encrypted = rsa.ProcessBlock(data, 0, data.Length);
 
 			// call the enroll server
@@ -412,7 +405,7 @@ namespace WinAuth
 			// extract the server time
 			byte[] serverTime = new byte[8];
 			Array.Copy(responseData, serverTime, 8);
-			if (BitConverter.IsLittleEndian == true)
+			if (BitConverter.IsLittleEndian)
 			{
 				Array.Reverse(serverTime);
 			}
@@ -460,7 +453,7 @@ namespace WinAuth
 		public override void Sync()
 		{
 			// check if data is protected
-			if (this.SecretKey == null && this.EncryptedData != null)
+			if (SecretKey == null && EncryptedData != null)
 			{
 				throw new EncryptedSecretDataException();
 			}
@@ -474,7 +467,7 @@ namespace WinAuth
 			try
 			{
 				// create a connection to time sync server
-				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(GetMobileUrl(this.Region) + SYNC_PATH);
+				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(GetMobileUrl(Region) + SYNC_PATH);
 				request.Method = "GET";
 				request.Timeout = 5000;
 
@@ -515,7 +508,7 @@ namespace WinAuth
 				// 00-07 server time (Big Endian)
 
 				// extract the server time
-				if (BitConverter.IsLittleEndian == true)
+				if (BitConverter.IsLittleEndian)
 				{
 					Array.Reverse(responseData);
 				}
@@ -597,10 +590,8 @@ namespace WinAuth
 				{
 					throw new InvalidRestoreResponseException(string.Format("No response from server ({0}). Perhaps maintainence?", code));
 				}
-				else
-				{
-					throw new InvalidRestoreResponseException(string.Format("Error communicating with server: {0} - {1}", code, ((HttpWebResponse)we.Response).StatusDescription));
-				}
+
+				throw new InvalidRestoreResponseException(string.Format("Error communicating with server: {0} - {1}", code, ((HttpWebResponse)we.Response).StatusDescription));
 			}
 
 			// only take the first 10 bytes of the restore code and encode to byte taking count of the missing chars
@@ -631,7 +622,7 @@ namespace WinAuth
 
 			// encrypt the data with BMA public key
 			RsaEngine rsa = new RsaEngine();
-			rsa.Init(true, new RsaKeyParameters(false, new Org.BouncyCastle.Math.BigInteger(ENROLL_MODULUS, 16), new Org.BouncyCastle.Math.BigInteger(ENROLL_EXPONENT, 16)));
+			rsa.Init(true, new RsaKeyParameters(false, new BigInteger(ENROLL_MODULUS, 16), new BigInteger(ENROLL_EXPONENT, 16)));
 			byte[] encrypted = rsa.ProcessBlock(hashkey, 0, hashkey.Length);
 
 			// prepend the serial to the encrypted data
@@ -686,14 +677,12 @@ namespace WinAuth
 				{
 					throw new InvalidRestoreResponseException(string.Format("No response from server ({0}). Perhaps maintainence?", code));
 				}
-				else if (code >= 600 && code < 700)
+				if (code >= 600 && code < 700)
 				{
 					throw new InvalidRestoreCodeException("Invalid serial number or restore code.");
 				}
-				else
-				{
-					throw new InvalidRestoreResponseException(string.Format("Error communicating with server: {0} - {1}", code, ((HttpWebResponse)we.Response).StatusDescription));
-				}
+
+				throw new InvalidRestoreResponseException(string.Format("Error communicating with server: {0} - {1}", code, ((HttpWebResponse)we.Response).StatusDescription));
 			}
 
 			// xor the returned data key with our pad to get the actual secret key
@@ -743,7 +732,7 @@ namespace WinAuth
 		/// <param name="writer">XmlWriter to write data</param>
 		protected override void WriteExtraXml(XmlWriter writer)
 		{
-			if (RestoreCodeVerified == true)
+			if (RestoreCodeVerified)
 			{
 				writer.WriteStartElement("restorecodeverified");
 				writer.WriteString(bool.TrueString.ToLower());
@@ -763,14 +752,12 @@ namespace WinAuth
 			{
 				upperregion = upperregion.Substring(0,2);
 			}
-			if (MOBILE_URLS.ContainsKey(upperregion) == true)
+			if (MOBILE_URLS.ContainsKey(upperregion))
 			{
 				return MOBILE_URLS[upperregion];
 			}
-			else
-			{
-				return MOBILE_URLS[REGION_US];
-			}
+
+			return MOBILE_URLS[REGION_US];
 		}
 
 		/// <summary>
@@ -781,7 +768,7 @@ namespace WinAuth
 		protected string BuildRestoreCode()
     {
 			// return if not set
-			if (string.IsNullOrEmpty(Serial) == true || SecretKey == null)
+			if (string.IsNullOrEmpty(Serial) || SecretKey == null)
 			{
 				return string.Empty;
 			}
@@ -847,28 +834,25 @@ namespace WinAuth
 			{
 				return (byte)(c - '0');
 			}
-			else
+			byte index = (byte)(c + 10 - 65);
+			if (c >= 'I')
 			{
-				byte index = (byte)(c + 10 - 65);
-				if (c >= 'I')
-				{
-					index--;
-				}
-				if (c >= 'L')
-				{
-					index--;
-				}
-				if (c >= 'O')
-				{
-					index--;
-				}
-				if (c >= 'S')
-				{
-					index--;
-				}
-
-				return index;
+				index--;
 			}
+			if (c >= 'L')
+			{
+				index--;
+			}
+			if (c >= 'O')
+			{
+				index--;
+			}
+			if (c >= 'S')
+			{
+				index--;
+			}
+
+			return index;
 		}
 
 		/// <summary>
@@ -883,27 +867,24 @@ namespace WinAuth
 			{
 				return (char)(index + 48);
 			}
-			else
+			index = (index + 65) - 10;
+			if (index >= 73)
 			{
-				index = (index + 65) - 10;
-				if (index >= 73)
-				{
-					index++;
-				}
-				if (index >= 76)
-				{
-					index++;
-				}
-				if (index >= 79)
-				{
-					index++;
-				}
-				if (index >= 83)
-				{
-					index++;
-				}
-				return (char)index;
+				index++;
 			}
+			if (index >= 76)
+			{
+				index++;
+			}
+			if (index >= 79)
+			{
+				index++;
+			}
+			if (index >= 83)
+			{
+				index++;
+			}
+			return (char)index;
 		}
 
 		#endregion

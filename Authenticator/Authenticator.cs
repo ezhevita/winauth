@@ -16,29 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
-using System.Xml.Serialization;
-
 using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Macs;
-using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Paddings;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
-using System.Collections;
-using System.Security;
-
+using Org.BouncyCastle.Crypto.Parameters;
 #if NUNIT
 using NUnit.Framework;
 #endif
@@ -72,7 +60,7 @@ namespace WinAuth
     /// <summary>
     /// Version for encrpytion changes
     /// </summary>
-    private static string ENCRYPTION_HEADER = Authenticator.ByteArrayToString(Encoding.UTF8.GetBytes("WINAUTH3"));
+    private static string ENCRYPTION_HEADER = ByteArrayToString(Encoding.UTF8.GetBytes("WINAUTH3"));
 
     /// <summary>
     /// Default number of digits in code
@@ -181,18 +169,18 @@ namespace WinAuth
       get
       {
         // this is the secretkey
-        return Authenticator.ByteArrayToString(SecretKey) + "\t" + this.CodeDigits.ToString() + "\t" + this.HMACType.ToString() + "\t" + this.Period.ToString();
+        return ByteArrayToString(SecretKey) + "\t" + CodeDigits + "\t" + HMACType + "\t" + Period;
       }
       set
       {
         if (string.IsNullOrEmpty(value) == false)
         {
           string[] parts = value.Split('|')[0].Split('\t');
-          SecretKey = Authenticator.StringToByteArray(parts[0]);
+          SecretKey = StringToByteArray(parts[0]);
           if (parts.Length > 1)
           {
             int digits;
-            if (int.TryParse(parts[1], out digits) == true)
+            if (int.TryParse(parts[1], out digits))
             {
               CodeDigits = digits;
             }
@@ -204,7 +192,7 @@ namespace WinAuth
           if (parts.Length > 3)
           {
             int period;
-            if (int.TryParse(parts[3], out period) == true)
+            if (int.TryParse(parts[3], out period))
             {
               Period = period;
             }
@@ -241,7 +229,7 @@ namespace WinAuth
       get
       {
         // calculate the code interval; the server's time div 30,000
-        return (CurrentTime + ServerTimeDiff) / ((long)this.Period * 1000L);
+        return (CurrentTime + ServerTimeDiff) / (Period * 1000L);
       }
     }
 
@@ -253,12 +241,12 @@ namespace WinAuth
     {
       get
       {
-        if (this.SecretKey == null && this.EncryptedData != null)
+        if (SecretKey == null && EncryptedData != null)
         {
           throw new EncryptedSecretDataException();
         }
 
-        return CalculateCode(false);
+        return CalculateCode();
       }
     }
 
@@ -270,7 +258,7 @@ namespace WinAuth
     static Authenticator()
     {
       // Issue#71: remove the default .net expect header, which can cause issues (http://stackoverflow.com/questions/566437/)
-      System.Net.ServicePointManager.Expect100Continue = false;
+      ServicePointManager.Expect100Continue = false;
     }
 
     /// <summary>
@@ -291,11 +279,11 @@ namespace WinAuth
     protected virtual string CalculateCode(bool resync = false, long interval = -1)
     {
       // sync time if required
-      if (resync == true || ServerTimeDiff == 0)
+      if (resync || ServerTimeDiff == 0)
       {
         if (interval > 0)
         {
-          ServerTimeDiff = (interval * ((long)this.Period * 1000L)) - CurrentTime;
+          ServerTimeDiff = (interval * (Period * 1000L)) - CurrentTime;
         }
         else
         {
@@ -364,7 +352,7 @@ namespace WinAuth
       if (string.IsNullOrEmpty(authenticatorType) == false)
       {
         authenticatorType = authenticatorType.Replace("WindowsAuthenticator.", "WinAuth.");
-        Type type = System.Reflection.Assembly.GetExecutingAssembly().GetType(authenticatorType, false, true);
+        Type type = Assembly.GetExecutingAssembly().GetType(authenticatorType, false, true);
         authenticator = Activator.CreateInstance(type) as Authenticator;
       }
       if (authenticator == null)
@@ -442,7 +430,7 @@ namespace WinAuth
     public static PasswordTypes DecodePasswordTypes(string passwordTypes)
     {
       PasswordTypes passwordType = PasswordTypes.None;
-      if (string.IsNullOrEmpty(passwordTypes) == true)
+      if (string.IsNullOrEmpty(passwordTypes))
       {
         return passwordType;
       }
@@ -467,8 +455,6 @@ namespace WinAuth
             break;
           case 'b':
             passwordType |= PasswordTypes.YubiKeySlot2;
-            break;
-          default:
             break;
         }
       }
@@ -503,7 +489,7 @@ namespace WinAuth
     public void SetEncryption(PasswordTypes passwordType, string password = null)
     {
       // check if still encrpyted
-      if (this.RequiresPassword == true)
+      if (RequiresPassword)
       {
         // have to decrypt to be able to re-encrypt
         throw new EncryptedSecretDataException();
@@ -511,9 +497,9 @@ namespace WinAuth
 
       if (passwordType == PasswordTypes.None)
       {
-        this.RequiresPassword = false;
-        this.EncryptedData = null;
-        this.PasswordType = passwordType;
+        RequiresPassword = false;
+        EncryptedData = null;
+        PasswordType = passwordType;
       }
       else
       {
@@ -525,35 +511,35 @@ namespace WinAuth
           settings.Encoding = Encoding.UTF8;
           using (XmlWriter encryptedwriter = XmlWriter.Create(ms, settings))
           {
-            string encrpytedData = this.EncryptedData;
-            Authenticator.PasswordTypes savedpasswordType = PasswordType;
+            string encrpytedData = EncryptedData;
+            PasswordTypes savedpasswordType = PasswordType;
             try
             {
-              PasswordType = Authenticator.PasswordTypes.None;
+              PasswordType = PasswordTypes.None;
               EncryptedData = null;
               WriteToWriter(encryptedwriter);
             }
             finally
             {
-              this.PasswordType = savedpasswordType;
-              this.EncryptedData = encrpytedData;
+              PasswordType = savedpasswordType;
+              EncryptedData = encrpytedData;
             }
           }
-          string data = Authenticator.ByteArrayToString(ms.ToArray());
+          string data = ByteArrayToString(ms.ToArray());
 
           // update secret hash
           using (SHA1 sha1 = SHA1.Create())
           {
-            this.SecretHash = sha1.ComputeHash(Encoding.UTF8.GetBytes(this.SecretData));
+            SecretHash = sha1.ComputeHash(Encoding.UTF8.GetBytes(SecretData));
           }
 
           // encrypt
-          this.EncryptedData = Authenticator.EncryptSequence(data, passwordType, password, null);
-          this.PasswordType = passwordType;
-          if (this.PasswordType == PasswordTypes.Explicit)
+          EncryptedData = EncryptSequence(data, passwordType, password, null);
+          PasswordType = passwordType;
+          if (PasswordType == PasswordTypes.Explicit)
           {
-            this.SecretData = null;
-            this.RequiresPassword = true;
+            SecretData = null;
+            RequiresPassword = true;
           }
         }
       }
@@ -561,7 +547,7 @@ namespace WinAuth
 
     public void Protect()
     {
-      if (this.PasswordType != PasswordTypes.None)
+      if (PasswordType != PasswordTypes.None)
       {
         // check if the data has changed
         //if (this.SecretData != null)
@@ -577,15 +563,15 @@ namespace WinAuth
         //	}
         //}
 
-        this.SecretData = null;
-        this.RequiresPassword = true;
-        this.Password = null;
+        SecretData = null;
+        RequiresPassword = true;
+        Password = null;
       }
     }
 
     public bool Unprotect(string password)
     {
-      PasswordTypes passwordType = this.PasswordType;
+      PasswordTypes passwordType = PasswordType;
       if (passwordType == PasswordTypes.None)
       {
         throw new InvalidOperationException("Cannot Unprotect a non-encrypted authenticator");
@@ -595,22 +581,22 @@ namespace WinAuth
       bool changed = false;
       try
       {
-        string data = Authenticator.DecryptSequence(this.EncryptedData, this.PasswordType, password, null);
-        using (MemoryStream ms = new MemoryStream(Authenticator.StringToByteArray(data)))
+        string data = DecryptSequence(EncryptedData, PasswordType, password, null);
+        using (MemoryStream ms = new MemoryStream(StringToByteArray(data)))
         {
           XmlReader reader = XmlReader.Create(ms);
-          changed = this.ReadXml(reader, password) || changed;
+          changed = ReadXml(reader, password) || changed;
         }
-        this.RequiresPassword = false;
+        RequiresPassword = false;
         // calculate hash of current secretdata
         using (SHA1 sha1 = SHA1.Create())
         {
-          this.SecretHash = sha1.ComputeHash(Encoding.UTF8.GetBytes(this.SecretData));
+          SecretHash = sha1.ComputeHash(Encoding.UTF8.GetBytes(SecretData));
         }
         // keep the password until we reprotect in case data changes
-        this.Password = password;
+        Password = password;
 
-        if (changed == true)
+        if (changed)
         {
           // we need to encrypt changed secret data
           using (MemoryStream ms = new MemoryStream())
@@ -623,16 +609,16 @@ namespace WinAuth
             {
               WriteToWriter(encryptedwriter);
             }
-            string encrypteddata = Authenticator.ByteArrayToString(ms.ToArray());
+            string encrypteddata = ByteArrayToString(ms.ToArray());
 
             // update secret hash
             using (SHA1 sha1 = SHA1.Create())
             {
-              this.SecretHash = sha1.ComputeHash(Encoding.UTF8.GetBytes(this.SecretData));
+              SecretHash = sha1.ComputeHash(Encoding.UTF8.GetBytes(SecretData));
             }
 
             // encrypt
-            this.EncryptedData = Authenticator.EncryptSequence(encrypteddata, passwordType, password, null);
+            EncryptedData = EncryptSequence(encrypteddata, passwordType, password, null);
           }
         }
 
@@ -640,12 +626,12 @@ namespace WinAuth
       }
       catch (EncryptedSecretDataException)
       {
-        this.RequiresPassword = true;
+        RequiresPassword = true;
         throw;
       }
       finally
       {
-        this.PasswordType = passwordType;
+        PasswordType = passwordType;
       }
     }
 
@@ -654,12 +640,12 @@ namespace WinAuth
       // decode the password type
       string encrypted = reader.GetAttribute("encrypted");
       PasswordTypes passwordType = DecodePasswordTypes(encrypted);
-      this.PasswordType = passwordType;
+      PasswordType = passwordType;
 
       if (passwordType != PasswordTypes.None)
       {
         // read the encrypted text from the node
-        this.EncryptedData = reader.ReadElementContentAsString();
+        EncryptedData = reader.ReadElementContentAsString();
         return Unprotect(password);
 
         //// decrypt
@@ -730,15 +716,13 @@ namespace WinAuth
         // no time sync
         return true;
       }
-      else if (ServerTimeDiff == 0 || LastServerTime == 0 || LastServerTime < DateTime.Now.AddHours(-24).Ticks)
+      if (ServerTimeDiff == 0 || LastServerTime == 0 || LastServerTime < DateTime.Now.AddHours(-24).Ticks)
       {
         Sync();
         return true;
       }
-      else
-      {
-        return false;
-      }
+
+      return false;
     }
 
     /// <summary>
@@ -749,15 +733,15 @@ namespace WinAuth
     {
       writer.WriteStartElement("authenticatordata");
       //writer.WriteAttributeString("type", this.GetType().FullName);
-      string encrypted = EncodePasswordTypes(this.PasswordType);
+      string encrypted = EncodePasswordTypes(PasswordType);
       if (string.IsNullOrEmpty(encrypted) == false)
       {
         writer.WriteAttributeString("encrypted", encrypted);
       }
 
-      if (this.PasswordType != PasswordTypes.None)
+      if (PasswordType != PasswordTypes.None)
       {
-        writer.WriteRaw(this.EncryptedData);
+        writer.WriteRaw(EncryptedData);
       }
       else
       {
@@ -996,9 +980,9 @@ namespace WinAuth
         if ((encryptedTypes & PasswordTypes.Machine) != 0)
         {
           // we are going to decrypt with the Windows local machine key
-          byte[] cipher = Authenticator.StringToByteArray(data);
+          byte[] cipher = StringToByteArray(data);
           byte[] plain = ProtectedData.Unprotect(cipher, null, DataProtectionScope.LocalMachine);
-          if (decode == true)
+          if (decode)
           {
             data = Encoding.UTF8.GetString(plain, 0, plain.Length);
           }
@@ -1012,7 +996,7 @@ namespace WinAuth
           // we are going to decrypt with the Windows User account key
           byte[] cipher = StringToByteArray(data);
           byte[] plain = ProtectedData.Unprotect(cipher, null, DataProtectionScope.CurrentUser);
-          if (decode == true)
+          if (decode)
           {
             data = Encoding.UTF8.GetString(plain, 0, plain.Length);
           }
@@ -1024,14 +1008,14 @@ namespace WinAuth
         if ((encryptedTypes & PasswordTypes.Explicit) != 0)
         {
           // we use an explicit password to encrypt data
-          if (string.IsNullOrEmpty(password) == true)
+          if (string.IsNullOrEmpty(password))
           {
             throw new EncryptedSecretDataException();
           }
-          data = Authenticator.Decrypt(data, password, true);
-          if (decode == true)
+          data = Decrypt(data, password, true);
+          if (decode)
           {
-            byte[] plain = Authenticator.StringToByteArray(data);
+            byte[] plain = StringToByteArray(data);
             data = Encoding.UTF8.GetString(plain, 0, plain.Length);
           }
         }
@@ -1051,10 +1035,10 @@ namespace WinAuth
           data = data.Substring(seed.Length);
           byte[] key = yubi.ChallengeResponse(slot, StringToByteArray(seed));
 
-          data = Authenticator.Decrypt(data, key);
-          if (decode == true)
+          data = Decrypt(data, key);
+          if (decode)
           {
-            byte[] plain = Authenticator.StringToByteArray(data);
+            byte[] plain = StringToByteArray(data);
             data = Encoding.UTF8.GetString(plain, 0, plain.Length);
           }
 
@@ -1138,7 +1122,7 @@ namespace WinAuth
           // we encrypt the data using the hash of a random string from the YubiKey
           int slot = ((passwordType & PasswordTypes.YubiKeySlot1) != 0 ? 1 : 2);
           yubi.YubiData.Data = yubi.ChallengeResponse(slot, seed);
-          yubi.YubiData.Seed = Authenticator.ByteArrayToString(seed);
+          yubi.YubiData.Seed = ByteArrayToString(seed);
         }
 
         byte[] key = yubi.YubiData.Data;
@@ -1197,7 +1181,7 @@ namespace WinAuth
       RNGCryptoServiceProvider rg = new RNGCryptoServiceProvider();
       byte[] saltbytes = new byte[SALT_LENGTH];
       rg.GetBytes(saltbytes);
-      string salt = Authenticator.ByteArrayToString(saltbytes);
+      string salt = ByteArrayToString(saltbytes);
 
       // build our PBKDF2 key
 #if NETCF
@@ -1218,7 +1202,7 @@ namespace WinAuth
     /// <returns>hex coded encrypted string</returns>
     public static string Encrypt(string plain, byte[] key)
     {
-      byte[] inBytes = Authenticator.StringToByteArray(plain);
+      byte[] inBytes = StringToByteArray(plain);
 
       // get our cipher
       BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new BlowfishEngine(), new ISO10126d2Padding());
@@ -1237,7 +1221,7 @@ namespace WinAuth
       }
 
       // return encoded byte->hex string
-      return Authenticator.ByteArrayToString(outBytes);
+      return ByteArrayToString(outBytes);
     }
 
     /// <summary>
@@ -1250,9 +1234,9 @@ namespace WinAuth
     public static string Decrypt(string data, string password, bool PBKDF2)
     {
       byte[] key;
-      byte[] saltBytes = Authenticator.StringToByteArray(data.Substring(0, SALT_LENGTH * 2));
+      byte[] saltBytes = StringToByteArray(data.Substring(0, SALT_LENGTH * 2));
 
-      if (PBKDF2 == true)
+      if (PBKDF2)
       {
         // extract the salt from the data
         byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
@@ -1278,7 +1262,7 @@ namespace WinAuth
       }
 
       // extract the actual data to be decrypted
-      byte[] inBytes = Authenticator.StringToByteArray(data.Substring(SALT_LENGTH * 2));
+      byte[] inBytes = StringToByteArray(data.Substring(SALT_LENGTH * 2));
 
       // get cipher
       BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new BlowfishEngine(), new ISO10126d2Padding());
@@ -1305,7 +1289,7 @@ namespace WinAuth
       }
 
       // return encoded string
-      return Authenticator.ByteArrayToString(outBytes);
+      return ByteArrayToString(outBytes);
     }
 
     /// <summary>
@@ -1317,7 +1301,7 @@ namespace WinAuth
     public static string Decrypt(string data, byte[] key)
     {
       // the actual data to be decrypted
-      byte[] inBytes = Authenticator.StringToByteArray(data);
+      byte[] inBytes = StringToByteArray(data);
 
       // get cipher
       BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new BlowfishEngine(), new ISO10126d2Padding());
@@ -1344,7 +1328,7 @@ namespace WinAuth
       }
 
       // return encoded string
-      return Authenticator.ByteArrayToString(outBytes);
+      return ByteArrayToString(outBytes);
     }
 
     /// <summary>
@@ -1382,7 +1366,7 @@ namespace WinAuth
     public object Clone()
     {
       // we only need to do shallow copy
-      return this.MemberwiseClone();
+      return MemberwiseClone();
     }
 
     #endregion

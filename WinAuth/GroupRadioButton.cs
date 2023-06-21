@@ -18,24 +18,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+using MetroFramework.Controls;
 
 namespace WinAuth
 {
-	public class GroupMetroRadioButton : MetroFramework.Controls.MetroRadioButton
+	public class GroupMetroRadioButton : MetroRadioButton
 	{
 		public GroupMetroRadioButton()
-			: base()
 		{
 		}
 
 		public GroupMetroRadioButton(string group)
-			: base()
 		{
 			Group = group;
 		}
@@ -46,13 +40,13 @@ namespace WinAuth
 		{
 			base.OnCheckedChanged(e);
 
-			string group = this.Group;
+			string group = Group;
 			if (string.IsNullOrEmpty(group))
 			{
 				return;
 			}
 
-			bool check = this.Checked;
+			bool check = Checked;
 			Form form = FindParentControl<Form>();
 			GroupMetroRadioButton[] radios = FindAllControls<GroupMetroRadioButton>(form);
 			foreach (GroupMetroRadioButton grb in radios)
@@ -66,7 +60,7 @@ namespace WinAuth
 
 		private T FindParentControl<T>() where T : Control
 		{
-			Control parent = this.Parent;
+			Control parent = Parent;
 			while (parent != null && !(parent is T))
 			{
 				parent = parent.Parent;
@@ -79,7 +73,7 @@ namespace WinAuth
 			List<T> controls = new List<T>();
 			foreach (Control c in parent.Controls)
 			{
-				if (c is T == true)
+				if (c is T)
 				{
 					controls.Add((T)c);
 					if (c.Controls != null && c.Controls.Count != 0)
@@ -96,12 +90,10 @@ namespace WinAuth
 	public class GroupRadioButton : RadioButton
 	{
 		public GroupRadioButton()
-			: base()
 		{
 		}
 
 		public GroupRadioButton(string group)
-			: base()
 		{
 			Group = group;
 		}
@@ -112,13 +104,13 @@ namespace WinAuth
 		{
 			base.OnCheckedChanged(e);
 
-			string group = this.Group;
+			string group = Group;
 			if (string.IsNullOrEmpty(group))
 			{
 				return;
 			}
 
-			bool check = this.Checked;
+			bool check = Checked;
 			Form form = FindParentControl<Form>();
 			GroupRadioButton[] radios = FindAllControls<GroupRadioButton>(form);
 			foreach (GroupRadioButton grb in radios)
@@ -132,7 +124,7 @@ namespace WinAuth
 
 		private T FindParentControl<T>() where T : Control
 		{
-			Control parent = this.Parent;
+			Control parent = Parent;
 			while (parent != null && !(parent is T))
 			{
 				parent = parent.Parent;
@@ -145,7 +137,7 @@ namespace WinAuth
 			List<T> controls = new List<T>();
 			foreach (Control c in parent.Controls)
 			{
-				if (c is T == true)
+				if (c is T)
 				{
 					controls.Add((T)c);
 					if (c.Controls != null && c.Controls.Count != 0)

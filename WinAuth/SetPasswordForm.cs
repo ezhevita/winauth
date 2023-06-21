@@ -17,14 +17,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-
 using WinAuth.Resources;
 
 namespace WinAuth
@@ -54,19 +47,19 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void showCheckbox_CheckedChanged(object sender, EventArgs e)
 		{
-			if (this.showCheckbox.Checked == true)
+			if (showCheckbox.Checked)
 			{
-				this.passwordField.UseSystemPasswordChar = false;
-				this.passwordField.PasswordChar = (char)0;
-				this.verifyField.UseSystemPasswordChar = false;
-				this.verifyField.PasswordChar = (char)0;
+				passwordField.UseSystemPasswordChar = false;
+				passwordField.PasswordChar = (char)0;
+				verifyField.UseSystemPasswordChar = false;
+				verifyField.PasswordChar = (char)0;
 			}
 			else
 			{
-				this.passwordField.UseSystemPasswordChar = true;
-				this.passwordField.PasswordChar = '*';
-				this.verifyField.UseSystemPasswordChar = true;
-				this.verifyField.PasswordChar = '*';
+				passwordField.UseSystemPasswordChar = true;
+				passwordField.PasswordChar = '*';
+				verifyField.UseSystemPasswordChar = true;
+				verifyField.PasswordChar = '*';
 			}
 		}
 
@@ -77,19 +70,19 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void okButton_Click(object sender, EventArgs e)
 		{
-			string password = this.passwordField.Text.Trim();
-			string verify = this.verifyField.Text.Trim();
+			string password = passwordField.Text.Trim();
+			string verify = verifyField.Text.Trim();
 			if (password != verify)
 			{
 				//WinAuthForm.ErrorDialog(this, "Your passwords do not match.");
-				this.errorLabel.Text = strings.PasswordsDontMatch;
-				this.errorLabel.Visible = true;
-				this.errorTimer.Enabled = true;
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				errorLabel.Text = strings.PasswordsDontMatch;
+				errorLabel.Visible = true;
+				errorTimer.Enabled = true;
+				DialogResult = DialogResult.None;
 				return;
 			}
 
-			this.Password = password;
+			Password = password;
 		}
 
 		/// <summary>
@@ -99,9 +92,9 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void errorTimer_Tick(object sender, EventArgs e)
 		{
-			this.errorTimer.Enabled = false;
-			this.errorLabel.Text = string.Empty;
-			this.errorLabel.Visible = false;
+			errorTimer.Enabled = false;
+			errorLabel.Text = string.Empty;
+			errorLabel.Visible = false;
 		}
 	}
 }

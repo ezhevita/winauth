@@ -18,12 +18,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Reflection;
+using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows.Forms;
 
 namespace WinAuth
@@ -36,7 +33,7 @@ namespace WinAuth
 		/// <summary>
 		/// Type of hook to set
 		/// </summary>
-		public enum HookType : int
+		public enum HookType
 		{
 			WH_JOURNALRECORD = 0,
 			WH_JOURNALPLAYBACK = 1,
@@ -192,7 +189,7 @@ namespace WinAuth
 		/// <summary>
 		/// Key modifiers for setting/check alt,ctrl,etc (there is no etc key)
 		/// </summary>
-		[Flags()]
+		[Flags]
 		public enum KeyModifiers : uint
 		{
 			None = 0,
@@ -285,7 +282,7 @@ namespace WinAuth
 			Hardware = 2,
 		}
 
-		public enum ShowWindowCommands : int
+		public enum ShowWindowCommands
 		{
 			Hide = 0,
 			Normal = 1,
@@ -339,9 +336,9 @@ namespace WinAuth
 			public int length;
 			public int flags;
 			public ShowWindowCommands showCmd;
-			public System.Drawing.Point ptMinPosition;
-			public System.Drawing.Point ptMaxPosition;
-			public System.Drawing.Rectangle rcNormalPosition;
+			public Point ptMinPosition;
+			public Point ptMaxPosition;
+			public Rectangle rcNormalPosition;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -483,7 +480,7 @@ namespace WinAuth
 			GCHandle listHandle = GCHandle.Alloc(result);
 			try
 			{
-				EnumWindowProc childProc = new EnumWindowProc(EnumWindow);
+				EnumWindowProc childProc = EnumWindow;
 				EnumChildWindows(parent, childProc, GCHandle.ToIntPtr(listHandle));
 			}
 			finally
@@ -494,7 +491,7 @@ namespace WinAuth
 				}
 			}
 
-			if (onlyDirect == true)
+			if (onlyDirect)
 			{
 				foreach (var h in result.ToArray())
 				{
@@ -539,7 +536,7 @@ namespace WinAuth
 			private HashSet<int> _messages;
 			private bool _isMouseOverControl;
 
-			public MessageForwarder(Control control, int message) : this(control, new int[] { message }) { }
+			public MessageForwarder(Control control, int message) : this(control, new[] { message }) { }
 
 			public MessageForwarder(Control control, IEnumerable<int> messages)
 			{
@@ -548,10 +545,10 @@ namespace WinAuth
 				_previousParent = control.Parent;
 				_isMouseOverControl = false;
 
-				control.ParentChanged += new EventHandler(control_ParentChanged);
-				control.MouseEnter += new EventHandler(control_MouseEnter);
-				control.MouseLeave += new EventHandler(control_MouseLeave);
-				control.Leave += new EventHandler(control_Leave);
+				control.ParentChanged += control_ParentChanged;
+				control.MouseEnter += control_MouseEnter;
+				control.MouseLeave += control_MouseLeave;
+				control.Leave += control_Leave;
 
 				if (control.Parent != null)
 				{

@@ -1,3 +1,7 @@
+using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
 namespace WinAuth
 {
 	partial class DiagnosticForm
@@ -5,7 +9,7 @@ namespace WinAuth
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -90,8 +94,8 @@ namespace WinAuth
 
 		#endregion
 
-		private System.Windows.Forms.Label label;
-		private System.Windows.Forms.TextBox dataText;
-		private MetroFramework.Controls.MetroButton closeButton;
+		private Label label;
+		private TextBox dataText;
+		private MetroButton closeButton;
 	}
 }

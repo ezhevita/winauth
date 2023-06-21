@@ -1,3 +1,7 @@
+using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
 namespace WinAuth
 {
 	partial class AddGoogleAuthenticator
@@ -5,7 +9,7 @@ namespace WinAuth
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -296,24 +300,24 @@ namespace WinAuth
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel step1Label;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroTextBox secretCodeField;
+		private MetroLabel step1Label;
+		private MetroButton okButton;
+		private MetroButton cancelButton;
+		private MetroTextBox secretCodeField;
 		private GroupMetroRadioButton icon3RadioButton;
 		private GroupMetroRadioButton icon2RadioButton;
 		private GroupMetroRadioButton icon1RadioButton;
-		private System.Windows.Forms.PictureBox icon3;
-		private System.Windows.Forms.PictureBox icon2;
-		private System.Windows.Forms.PictureBox icon1;
-		private MetroFramework.Controls.MetroLabel iconLabel;
-		private MetroFramework.Controls.MetroLabel nameLabel;
-		private MetroFramework.Controls.MetroTextBox nameField;
-		private MetroFramework.Controls.MetroLabel step2Label;
-		private MetroFramework.Controls.MetroButton verifyButton;
-		private System.Windows.Forms.ProgressBar codeProgress;
+		private PictureBox icon3;
+		private PictureBox icon2;
+		private PictureBox icon1;
+		private MetroLabel iconLabel;
+		private MetroLabel nameLabel;
+		private MetroTextBox nameField;
+		private MetroLabel step2Label;
+		private MetroButton verifyButton;
+		private ProgressBar codeProgress;
 		private SecretTextBox codeField;
-		private MetroFramework.Controls.MetroLabel step3Label;
-		private System.Windows.Forms.Timer timer;
+		private MetroLabel step3Label;
+		private Timer timer;
 	}
 }

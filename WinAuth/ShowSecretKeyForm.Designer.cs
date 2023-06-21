@@ -15,6 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
 namespace WinAuth
 {
 	partial class ShowSecretKeyForm
@@ -22,7 +27,7 @@ namespace WinAuth
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -141,11 +146,11 @@ namespace WinAuth
 
 		#endregion
 
-		private MetroFramework.Controls.MetroButton btnClose;
-		private MetroFramework.Controls.MetroLabel label4;
+		private MetroButton btnClose;
+		private MetroLabel label4;
 		private SecretTextBox secretKeyField;
-		private System.Windows.Forms.PictureBox qrImage;
-		private MetroFramework.Controls.MetroCheckBox allowCopyCheckBox;
-		private MetroFramework.Controls.MetroLabel metroLabel1;
+		private PictureBox qrImage;
+		private MetroCheckBox allowCopyCheckBox;
+		private MetroLabel metroLabel1;
 	}
 }

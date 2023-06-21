@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace WindowsInput
+﻿namespace WindowsInput
 {
     /// <summary>
     /// Specifies the type of the input event. This member can be one of the following values. 

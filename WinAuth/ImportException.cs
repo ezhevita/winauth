@@ -18,9 +18,6 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace WinAuth
 {
@@ -29,7 +26,8 @@ namespace WinAuth
 	/// </summary>
 	public class ImportException : ApplicationException
 	{
-		public ImportException() : base() { }
+		public ImportException()
+		{ }
 
 		public ImportException(string message) : base(message) { }
 

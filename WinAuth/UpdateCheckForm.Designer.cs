@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using MetroFramework.Controls;
+using MetroFramework.Drawing.Html;
+
+namespace WinAuth
 {
 	partial class UpdateCheckForm
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -134,11 +138,11 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Drawing.Html.HtmlLabel versionInfoLabel;
-		private MetroFramework.Controls.MetroCheckBox autoCheckbox;
-		private MetroFramework.Controls.MetroComboBox autoDropdown;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroLabel autoLabel;
+		private MetroButton cancelButton;
+		private HtmlLabel versionInfoLabel;
+		private MetroCheckBox autoCheckbox;
+		private MetroComboBox autoDropdown;
+		private MetroButton okButton;
+		private MetroLabel autoLabel;
 	}
 }

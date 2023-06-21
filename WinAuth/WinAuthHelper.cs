@@ -19,38 +19,27 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Security.Permissions;
 using System.Security;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.XPath;
 using System.Web;
-using System.Windows;
 using System.Windows.Forms;
-
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Macs;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Paddings;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Bcpg;
-using Org.BouncyCastle.Bcpg.OpenPgp;
-
+using System.Xml;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
-
 using Microsoft.Win32;
-
+using Org.BouncyCastle.Bcpg;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Security;
 using WinAuth.Resources;
 
 namespace WinAuth
@@ -144,7 +133,7 @@ namespace WinAuth
 				config.Password = password;
 			}
 
-      if (string.IsNullOrEmpty(configFile) == true)
+      if (string.IsNullOrEmpty(configFile))
       {
         // check for file in current directory
         configFile = Path.Combine(Environment.CurrentDirectory, DEFAULT_AUTHENTICATOR_FILE_NAME);
@@ -153,7 +142,7 @@ namespace WinAuth
 						configFile = null;
 					}
 				}
-      if (string.IsNullOrEmpty(configFile) == true)
+      if (string.IsNullOrEmpty(configFile))
       {
         // check for file in exe directory
         configFile = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), DEFAULT_AUTHENTICATOR_FILE_NAME);
@@ -162,10 +151,10 @@ namespace WinAuth
 						configFile = null;
 					}
 				}
-      if (string.IsNullOrEmpty(configFile) == true)
+      if (string.IsNullOrEmpty(configFile))
       {
         // do we have a file specific in the registry?
-        string configDirectory = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
+        string configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
         // check for default authenticator
         configFile = Path.Combine(configDirectory, DEFAULT_AUTHENTICATOR_FILE_NAME);
 					// if no config file, just return a blank config
@@ -199,7 +188,7 @@ namespace WinAuth
 				if (data.Length == 0 || data[0] == 0)
 				{
 					// switch to backup
-					if (File.Exists(configFile + ".bak") == true)
+					if (File.Exists(configFile + ".bak"))
 					{
 						data = File.ReadAllBytes(configFile + ".bak");
 						if (data.Length != 0 && data[0] != 0)
@@ -228,7 +217,7 @@ namespace WinAuth
 					config.Upgraded = true;
 				}
 
-				if (changed == true && config.IsReadOnly == false)
+				if (changed && config.IsReadOnly == false)
 				{
 					SaveConfig(config);
 				}
@@ -241,10 +230,6 @@ namespace WinAuth
 			catch (BadPasswordException)
 			{
 				// we require a password
-				throw;
-			}
-			catch (Exception )
-			{
 				throw;
 			}
 
@@ -267,13 +252,13 @@ namespace WinAuth
 					string lastfile;
 					if (key != null
 						&& (lastfile = key.GetValue(string.Format(CultureInfo.InvariantCulture, WINAUTHREGKEY_LASTFILE, 1), null) as string) != null
-						&& File.Exists(lastfile) == true)
+						&& File.Exists(lastfile))
 					{
 						return lastfile;
 					}
 				}
 			}
-			catch (System.Security.SecurityException) { }
+			catch (SecurityException) { }
 
 			return null;
 		}
@@ -300,9 +285,9 @@ namespace WinAuth
         }
 
 				// if no config file yet, use default
-				if (string.IsNullOrEmpty(config.Filename) == true)
+				if (string.IsNullOrEmpty(config.Filename))
 				{
-					string configDirectory = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
+					string configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
 					Directory.CreateDirectory(configDirectory);
 					config.Filename = Path.Combine(configDirectory, DEFAULT_AUTHENTICATOR_FILE_NAME);
 				}
@@ -334,7 +319,7 @@ namespace WinAuth
 
 						// move it to old file
 						File.Delete(config.Filename + ".bak");
-            if (File.Exists(config.Filename) == true)
+            if (File.Exists(config.Filename))
             {
               File.Move(config.Filename, config.Filename + ".bak");
             }
@@ -357,7 +342,7 @@ namespace WinAuth
 
     /// <summary>
     /// Save a PGP encrypted version of the config into the registry for recovery
-		/// 
+		///
 		/// Issue#133: this just compounds each time we load, and is really pointless so we are removing it
 		/// but in the meantime we have to clear it out
 		/// </summary>
@@ -377,7 +362,7 @@ namespace WinAuth
 			{
 				return;
 			}
-      
+
 			using (HashAlgorithm sha = Authenticator.SafeHasher("SHA256"))
 			{
 				// get a hash based on the authenticator key
@@ -391,12 +376,12 @@ namespace WinAuth
 					using (XmlWriter xw = XmlWriter.Create(sw, xmlsettings))
 					{
 						xw.WriteStartElement("WinAuth");
-						xw.WriteAttributeString("version", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(2));
+						xw.WriteAttributeString("version", Assembly.GetExecutingAssembly().GetName().Version.ToString(2));
 						wa.WriteXmlString(xw);
 						xw.WriteEndElement();
 					}
 
-					string pgpkey = string.IsNullOrEmpty(config.PGPKey) == false ? config.PGPKey : WinAuthHelper.WINAUTH_PGP_PUBLICKEY;
+					string pgpkey = string.IsNullOrEmpty(config.PGPKey) == false ? config.PGPKey : WINAUTH_PGP_PUBLICKEY;
 					config.WriteSetting(WINAUTHREGKEY_BACKUP + "\\" + authkey, PGPEncrypt(sw.ToString(), pgpkey));
 				}
 			}
@@ -426,15 +411,15 @@ namespace WinAuth
     /// <param name="enabled">enable or disable start with windows</param>
     public static void SetStartWithWindows(bool enabled)
     {
-      if (enabled == true)
+      if (enabled)
       {
         // get path of exe and minimize flag
 				WriteRegistryValue(RUNKEY + "\\" + WinAuthMain.APPLICATION_NAME, Application.ExecutablePath + " -min");
       }
       else
-      {				
+      {
         DeleteRegistryKey(RUNKEY + "\\" + WinAuthMain.APPLICATION_NAME);
-      }			
+      }
     }
 
 		/// <summary>
@@ -501,7 +486,7 @@ namespace WinAuth
 								// already have a password
 								if (string.IsNullOrEmpty(password) == false)
 								{
-									WinAuthForm.ErrorDialog(parent, strings.InvalidPassword, ex.InnerException, MessageBoxButtons.OK);
+									WinAuthForm.ErrorDialog(parent, strings.InvalidPassword, ex.InnerException);
 								}
 
 								// need password
@@ -530,7 +515,7 @@ namespace WinAuth
 				else if (string.Compare(Path.GetExtension(file), ".pgp", true) == 0)
 				{
 					string encoded = File.ReadAllText(file);
-					if (string.IsNullOrEmpty(pgpKey) == true)
+					if (string.IsNullOrEmpty(pgpKey))
 					{
 						// need password
 						GetPGPKeyForm form = new GetPGPKeyForm();
@@ -550,12 +535,11 @@ namespace WinAuth
 					}
 					catch (Exception ex)
 					{
-						WinAuthForm.ErrorDialog(parent, strings.InvalidPassword, ex.InnerException, MessageBoxButtons.OK);
+						WinAuthForm.ErrorDialog(parent, strings.InvalidPassword, ex.InnerException);
 
 						pgpKey = null;
 						password = null;
 						retry = true;
-						continue;
 					}
 				}
 				else // read a plain text file
@@ -617,13 +601,13 @@ namespace WinAuth
 
 						var query = HttpUtility.ParseQueryString(uri.Query);
 						string secret = query["secret"];
-						if (string.IsNullOrEmpty(secret) == true)
+						if (string.IsNullOrEmpty(secret))
 						{
 							throw new ApplicationException("Authenticator does not contain secret");
 						}
 
 						string counter = query["counter"];
-						if (uri.Host == "hotp" && string.IsNullOrEmpty(counter) == true)
+						if (uri.Host == "hotp" && string.IsNullOrEmpty(counter))
 						{
 							throw new ApplicationException("HOTP authenticator should have a counter");
 						}
@@ -635,7 +619,7 @@ namespace WinAuth
 						if (string.Compare(issuer, "BattleNet", true) == 0)
 						{
 							string serial = query["serial"];
-							if (string.IsNullOrEmpty(serial) == true)
+							if (string.IsNullOrEmpty(serial))
 							{
 								throw new ApplicationException("Battle.net Authenticator does not have a serial");
 							}
@@ -669,7 +653,7 @@ namespace WinAuth
 							auth = new HOTPAuthenticator();
 							((HOTPAuthenticator)auth).SecretKey = Base32.getInstance().Decode(secret);
 							((HOTPAuthenticator)auth).Counter = int.Parse(counter);
-							
+
 							if (string.IsNullOrEmpty(issuer) == false)
 							{
 								auth.Issuer = issuer;
@@ -705,19 +689,11 @@ namespace WinAuth
 						}
 
             Authenticator.HMACTypes hmactype;
-#if NETFX_3
-            try
-            {
-              hmactype = (WinAuth.Authenticator.HMACTypes)Enum.Parse(typeof(WinAuth.Authenticator.HMACTypes), query["algorithm"], true);
-              auth.HMACType = hmactype;
-            }
-            catch (Exception) { }
-#else
-            if (Enum.TryParse<Authenticator.HMACTypes>(query["algorithm"], true, out hmactype) == true)
+            if (Enum.TryParse(query["algorithm"], true, out hmactype))
             {
               auth.HMACType = hmactype;
             }
-#endif
+
             //
             if (label.Length != 0)
 						{
@@ -738,7 +714,7 @@ namespace WinAuth
 						string icon = query["icon"];
 						if (string.IsNullOrEmpty(icon) == false)
 						{
-							if (icon.StartsWith("base64:") == true)
+							if (icon.StartsWith("base64:"))
 							{
 								string b64 = Convert.ToBase64String(Base32.getInstance().Decode(icon.Substring(7)));
 								importedAuthenticator.Skin = "base64:" + b64;
@@ -779,7 +755,7 @@ namespace WinAuth
 					foreach (var auth in authenticators)
 					{
 						// unprotect if necessary
-						if (auth.AuthenticatorData.RequiresPassword == true)
+						if (auth.AuthenticatorData.RequiresPassword)
 						{
 							// request the password
 							UnprotectPasswordForm getPassForm = new UnprotectPasswordForm();
@@ -865,7 +841,7 @@ namespace WinAuth
 		/// <returns>encoded string</returns>
 		public static string HtmlEncode(string text)
 		{
-			if (string.IsNullOrEmpty(text) == true)
+			if (string.IsNullOrEmpty(text))
 			{
 				return text;
 			}
@@ -905,7 +881,7 @@ namespace WinAuth
 						break;
 				}
 			}
-			
+
 			return sb.ToString();
 		}
 
@@ -920,11 +896,11 @@ namespace WinAuth
 			NameValueCollection pairs = new NameValueCollection();
 
 			// ignore blanks and remove initial "?"
-			if (string.IsNullOrEmpty(qs) == true)
+			if (string.IsNullOrEmpty(qs))
 			{
 				return pairs;
 			}
-			if (qs.StartsWith("?") == true)
+			if (qs.StartsWith("?"))
 			{
 				qs = qs.Substring(1);
 			}
@@ -957,7 +933,7 @@ namespace WinAuth
 		/// <summary>
 		/// Read a value from a registry key, e.g. Software\WinAuth3\BetValue. Return defaultValue
 		/// if key does not exist or there is a security exception
-		/// 
+		///
 		/// The key name can conjtain the explicit root, e.g. "HKEY_LOCAL_MACHINE\Software..." otherwise
 		/// HKEY_CURRENT_USER is assumed.
 		/// </summary>
@@ -1004,7 +980,7 @@ namespace WinAuth
 					return (key != null ? key.GetValue(valuekey, defaultValue) : defaultValue);
 				}
 			}
-			catch (System.Security.SecurityException)
+			catch (SecurityException)
 			{
 				return defaultValue;
 			}
@@ -1075,7 +1051,7 @@ namespace WinAuth
 					return keys.ToArray();
 				}
 			}
-			catch (System.Security.SecurityException)
+			catch (SecurityException)
 			{
 				return new string[0];
 			}
@@ -1126,9 +1102,8 @@ namespace WinAuth
 					key.SetValue(valuekey, value);
 				}
 			}
-			catch (System.Security.SecurityException)
+			catch (SecurityException)
 			{
-				return;
 			}
 		}
 
@@ -1176,18 +1151,13 @@ namespace WinAuth
 				{
 					if (key != null)
 					{
-						if (key.GetValueNames().Contains(valuekey) == true)
+						if (key.GetValueNames().Contains(valuekey))
 						{
 							key.DeleteValue(valuekey, false);
 						}
-						if (key.GetSubKeyNames().Contains(valuekey) == true)
+						if (key.GetSubKeyNames().Contains(valuekey))
 						{
-#if NETFX_4
 							key.DeleteSubKeyTree(valuekey, false);
-#endif
-#if NETFX_3
-							key.DeleteSubKeyTree(valuekey);
-#endif
 						}
 
 						// if the parent now has no values, we can remove it too
@@ -1198,9 +1168,8 @@ namespace WinAuth
 					}
 				}
 			}
-			catch (System.Security.SecurityException)
+			catch (SecurityException)
 			{
-				return;
 			}
 		}
 
@@ -1218,17 +1187,17 @@ namespace WinAuth
     /// <param name="publicKey">returned ascii public key</param>
     public static void PGPGenerateKey(int bits, string identifier, string password, out string privateKey, out string publicKey)
     {
-      // generate a new RSA keypair 
+      // generate a new RSA keypair
       RsaKeyPairGenerator gen = new RsaKeyPairGenerator();
-      gen.Init(new RsaKeyGenerationParameters(BigInteger.ValueOf(0x101), new Org.BouncyCastle.Security.SecureRandom(), bits, 80));
+      gen.Init(new RsaKeyGenerationParameters(BigInteger.ValueOf(0x101), new SecureRandom(), bits, 80));
       AsymmetricCipherKeyPair pair = gen.GenerateKeyPair();
 
       // create PGP subpacket
       PgpSignatureSubpacketGenerator hashedGen = new PgpSignatureSubpacketGenerator();
       hashedGen.SetKeyFlags(true, PgpKeyFlags.CanCertify | PgpKeyFlags.CanSign | PgpKeyFlags.CanEncryptCommunications | PgpKeyFlags.CanEncryptStorage);
-      hashedGen.SetPreferredCompressionAlgorithms(false, new int[] { (int)CompressionAlgorithmTag.Zip });
-      hashedGen.SetPreferredHashAlgorithms(false, new int[] { (int)HashAlgorithmTag.Sha1 });
-      hashedGen.SetPreferredSymmetricAlgorithms(false, new int[] { (int)SymmetricKeyAlgorithmTag.Cast5 });
+      hashedGen.SetPreferredCompressionAlgorithms(false, new[] { (int)CompressionAlgorithmTag.Zip });
+      hashedGen.SetPreferredHashAlgorithms(false, new[] { (int)HashAlgorithmTag.Sha1 });
+      hashedGen.SetPreferredSymmetricAlgorithms(false, new[] { (int)SymmetricKeyAlgorithmTag.Cast5 });
       PgpSignatureSubpacketVector sv = hashedGen.Generate();
       PgpSignatureSubpacketGenerator unhashedGen = new PgpSignatureSubpacketGenerator();
 
@@ -1244,7 +1213,7 @@ namespace WinAuth
         (password != null ? password.ToCharArray() : null),
         hashedGen.Generate(),
         unhashedGen.Generate(),
-        new Org.BouncyCastle.Security.SecureRandom());
+        new SecureRandom());
 
       // extract the keys
       using (MemoryStream ms = new MemoryStream())
@@ -1287,7 +1256,7 @@ namespace WinAuth
           {
             foreach (PgpPublicKey key in keyring.GetPublicKeys())
             {
-              if (key.IsEncryptionKey == true && key.IsRevoked() == false)
+              if (key.IsEncryptionKey && key.IsRevoked() == false)
               {
                 publicKey = key;
                 break;
@@ -1302,15 +1271,15 @@ namespace WinAuth
       {
         using (ArmoredOutputStream armored = new ArmoredOutputStream(encryptedStream))
         {
-          PgpEncryptedDataGenerator pedg = new PgpEncryptedDataGenerator(Org.BouncyCastle.Bcpg.SymmetricKeyAlgorithmTag.Cast5, true, new Org.BouncyCastle.Security.SecureRandom());
+          PgpEncryptedDataGenerator pedg = new PgpEncryptedDataGenerator(SymmetricKeyAlgorithmTag.Cast5, true, new SecureRandom());
           pedg.AddMethod(publicKey);
           using (Stream pedgStream = pedg.Open(armored, new byte[4096]))
           {
-            PgpCompressedDataGenerator pcdg = new PgpCompressedDataGenerator(Org.BouncyCastle.Bcpg.CompressionAlgorithmTag.Zip);
+            PgpCompressedDataGenerator pcdg = new PgpCompressedDataGenerator(CompressionAlgorithmTag.Zip);
             using (Stream pcdgStream = pcdg.Open(pedgStream))
             {
               PgpLiteralDataGenerator pldg = new PgpLiteralDataGenerator();
-              using (Stream encrypter = pldg.Open(pcdgStream, PgpLiteralData.Binary, "", (long)data.Length, DateTime.Now))
+              using (Stream encrypter = pldg.Open(pcdgStream, PgpLiteralData.Binary, "", data.Length, DateTime.Now))
               {
                 encrypter.Write(data, 0, data.Length);
               }

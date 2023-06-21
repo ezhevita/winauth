@@ -16,16 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Xml;
-using System.Xml.Serialization;
-
 namespace WinAuth
 {
   /// <summary>
@@ -34,7 +24,6 @@ namespace WinAuth
   public class AuthenticatorException : ApplicationException
   {
     public AuthenticatorException()
-      : base()
     {
     }
 
@@ -54,7 +43,6 @@ namespace WinAuth
   /// </summary>
   public class InvalidConfigDataException : AuthenticatorException
   {
-    public InvalidConfigDataException() : base() { }
   }
 
   /// <summary>
@@ -62,7 +50,6 @@ namespace WinAuth
   /// </summary>
   public class InvalidHMACAlgorithmException : AuthenticatorException
   {
-    public InvalidHMACAlgorithmException() : base() { }
   }
 
   /// <summary>
@@ -70,7 +57,6 @@ namespace WinAuth
   /// </summary>
   public class InvalidUserDecryptionException : AuthenticatorException
   {
-    public InvalidUserDecryptionException() : base() { }
   }
 
   /// <summary>
@@ -78,7 +64,6 @@ namespace WinAuth
   /// </summary>
   public class InvalidMachineDecryptionException : AuthenticatorException
   {
-    public InvalidMachineDecryptionException() : base() { }
   }
 
   /// <summary>
@@ -110,7 +95,6 @@ namespace WinAuth
   /// </summary>
   public class EncryptedSecretDataException : AuthenticatorException
   {
-    public EncryptedSecretDataException() : base() { }
   }
 
   /// <summary>
@@ -141,7 +125,7 @@ namespace WinAuth
   /// </summary>
   public class InvalidEncryptionException : AuthenticatorException
   {
-    public InvalidEncryptionException(string plain, string password, string encrypted, string decrypted) : base()
+    public InvalidEncryptionException(string plain, string password, string encrypted, string decrypted)
     {
       Plain = plain;
       Password = password;

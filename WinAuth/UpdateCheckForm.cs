@@ -17,17 +17,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-
 using MetroFramework;
-
-using WinAuth.Resources;
 
 namespace WinAuth
 {
@@ -80,7 +72,7 @@ namespace WinAuth
 
 			// set the font for the HtmlLabel to match the form
 			Font font = MetroFonts.Label(MetroLabelSize.Small, MetroLabelWeight.Regular);
-			this.versionInfoLabel.Font = new Font(font.FontFamily, 10);
+			versionInfoLabel.Font = new Font(font.FontFamily, 10);
 		}
 
 		#region Form events
@@ -101,7 +93,7 @@ namespace WinAuth
 
 			if (Updater == null)
 			{
-				Updater = new WinAuthUpdater(this.Config);
+				Updater = new WinAuthUpdater(Config);
 			}
 
 			if (Updater.IsAutoCheck == false)
@@ -137,7 +129,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void okButton_Click(object sender, EventArgs e)
 		{
-			if (autoCheckbox.Checked == true)
+			if (autoCheckbox.Checked)
 			{
 				// get the interval and set in the updater
 				UpdateIntervalItem interval = autoDropdown.SelectedItem as UpdateIntervalItem;
@@ -156,7 +148,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void autoCheckbox_CheckedChanged(object sender, EventArgs e)
 		{
-			if (autoCheckbox.Checked == true && autoDropdown.SelectedIndex < 0)
+			if (autoCheckbox.Checked && autoDropdown.SelectedIndex < 0)
 			{
 				autoDropdown.SelectedIndex = 0;
 			}
@@ -209,13 +201,13 @@ namespace WinAuth
 		/// <param name="error">any error exception</param>
 		void Updater_GetLatestVersionCompleted(WinAuthVersionInfo latestInfo, bool cancelled, Exception error)
 		{
-			if (this.IsDisposed == true || IsHandleCreated == false)
+			if (IsDisposed || IsHandleCreated == false)
 			{
 				return;
 			}
 
 			string text = string.Empty;
-			if (cancelled == true)
+			if (cancelled)
 			{
 				text = "Update was cancelled";
 			}
@@ -240,7 +232,7 @@ namespace WinAuth
 			}
 
 			// update the textbox in a delegate
-			this.Invoke((MethodInvoker)delegate { versionInfoLabel.Text = text; });
+			Invoke((MethodInvoker)delegate { versionInfoLabel.Text = text; });
 		}
 
 		#endregion

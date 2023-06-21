@@ -19,14 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Windows.Forms;
-
 using WindowsInput;
 
 namespace WinAuth
@@ -139,7 +134,7 @@ namespace WinAuth
 		public static bool IsHotkeyAvailable(Form form, Keys key, WinAPI.KeyModifiers modifier)
 		{
 			bool available = WinAPI.RegisterHotKey(form.Handle, 0, modifier, key);
-			if (available == true)
+			if (available)
 			{
 				WinAPI.UnregisterHotKey(form.Handle, 0);
 			}
@@ -205,7 +200,7 @@ namespace WinAuth
 			if (m_hWnd != IntPtr.Zero && m_hWnd != WinAPI.GetForegroundWindow())
 			{
 				WinAPI.SetForegroundWindow(m_hWnd);
-				System.Threading.Thread.Sleep(50);
+				Thread.Sleep(50);
 			}
 
 			// replace any {CODE} items
@@ -220,7 +215,7 @@ namespace WinAuth
 				foreach (Match match in Regex.Matches(keys, @"\{.*?\}|[^\{]*", RegexOptions.Singleline))
 				{
 					// split into either {CMD d w} or just plain text
-					if (match.Success == true)
+					if (match.Success)
 					{
 						string single = match.Value;
 						if (single.Length == 0)
@@ -232,17 +227,17 @@ namespace WinAuth
 						{
 							// send command {COMMAND delay repeat}
 							Match cmdMatch = Regex.Match(single.Trim(), @"\{([^\s]+)\s*(\d*)\s*(\d*)\}");
-							if (cmdMatch.Success == true)
+							if (cmdMatch.Success)
 							{
 								// extract the command and any optional delay and repeat
 								string cmd = cmdMatch.Groups[1].Value.ToUpper();
 								int delay = 0;
-								if (cmdMatch.Groups[2].Success == true && cmdMatch.Groups[2].Value.Length != 0)
+								if (cmdMatch.Groups[2].Success && cmdMatch.Groups[2].Value.Length != 0)
 								{
 									int.TryParse(cmdMatch.Groups[2].Value, out delay);
 								}
 								int repeat = 1;
-								if (cmdMatch.Groups[3].Success == true && cmdMatch.Groups[3].Value.Length != 0)
+								if (cmdMatch.Groups[3].Success && cmdMatch.Groups[3].Value.Length != 0)
 								{
 									int.TryParse(cmdMatch.Groups[3].Value, out repeat);
 								}
@@ -261,14 +256,14 @@ namespace WinAuth
 									case "WAIT":
 										for (; repeat > 0; repeat--)
 										{
-											System.Threading.Thread.Sleep(delay);
+											Thread.Sleep(delay);
 										}
 										break;
 									case "COPY":
-										form.Invoke(new WinAuthForm.SetClipboardDataDelegate(form.SetClipboardData), new object[] { code });
+										form.Invoke(new WinAuthForm.SetClipboardDataDelegate(form.SetClipboardData), code);
 										break;
 									case "PASTE":
-										string clipboard = form.Invoke(new WinAuthForm.GetClipboardDataDelegate(form.GetClipboardData), new object[] { typeof(string) }) as string;
+										string clipboard = form.Invoke(new WinAuthForm.GetClipboardDataDelegate(form.GetClipboardData), typeof(string)) as string;
 										if (string.IsNullOrEmpty(clipboard) == false)
 										{
 											foreach (char key in clipboard)
@@ -279,8 +274,6 @@ namespace WinAuth
 										break;
 									case "EXIT":
 										Application.Exit();
-										break;
-									default:
 										break;
 								}
 							}
@@ -295,7 +288,7 @@ namespace WinAuth
 			finally
 			{
 				// resume input
-				if (blocked == true)
+				if (blocked)
 				{
 					WinAPI.BlockInput(false);
 				}
@@ -333,7 +326,7 @@ namespace WinAuth
 			{
 				// Issue#100: change to use InputSimulator as SendKeys does not work for internation keyboards
 				InputSimulator.SimulateTextEntry(key);
-				System.Threading.Thread.Sleep(delay != 0 ? delay : 50);
+				Thread.Sleep(delay != 0 ? delay : 50);
 			}
 		}
 
@@ -357,7 +350,7 @@ namespace WinAuth
 		private static IntPtr FindWindow(string window)
 		{
 			// default to return current window
-			if (string.IsNullOrEmpty(window) == true)
+			if (string.IsNullOrEmpty(window))
 			{
 				return WinAPI.GetForegroundWindow();
 			}
@@ -365,10 +358,10 @@ namespace WinAuth
 			// build regex
 			Regex reg;
 			Match match = Regex.Match(window, @"/(.*)/([a-z]*)", RegexOptions.IgnoreCase);
-			if (match.Success == true)
+			if (match.Success)
 			{
 				RegexOptions regoptions = RegexOptions.None;
-				if (match.Groups[2].Value.Contains("i") == true)
+				if (match.Groups[2].Value.Contains("i"))
 				{
 					regoptions |= RegexOptions.IgnoreCase;
 				}
@@ -492,12 +485,12 @@ namespace WinAuth
 		/// <param name="modifier"></param>
 		public KeyboardHookEventArgs(Keys key, WinAPI.KeyModifiers modifier)
 		{
-			this.Key = key;
-			this.Modifiers = modifier;
+			Key = key;
+			Modifiers = modifier;
 
-			this.Alt = (modifier & WinAPI.KeyModifiers.Alt) != 0;
-			this.Control = (modifier & WinAPI.KeyModifiers.Control) != 0;
-			this.Shift = (modifier & WinAPI.KeyModifiers.Shift) != 0;
+			Alt = (modifier & WinAPI.KeyModifiers.Alt) != 0;
+			Control = (modifier & WinAPI.KeyModifiers.Control) != 0;
+			Shift = (modifier & WinAPI.KeyModifiers.Shift) != 0;
 		}
 
 		/// <summary>
@@ -506,25 +499,25 @@ namespace WinAuth
 		/// <param name="keyCode"></param>
 		public KeyboardHookEventArgs(Keys keyCode)
 		{
-			this.Key = (Keys)keyCode;
+			Key = keyCode;
 			try
 			{
-				// we have to use Windows Form to get the modifiers as won't work if no focus 
-				this.Alt = (System.Windows.Forms.Control.ModifierKeys & Keys.Alt) != 0;
-				this.Control = (System.Windows.Forms.Control.ModifierKeys & Keys.Control) != 0;
-				this.Shift = (System.Windows.Forms.Control.ModifierKeys & Keys.Shift) != 0;
+				// we have to use Windows Form to get the modifiers as won't work if no focus
+				Alt = (System.Windows.Forms.Control.ModifierKeys & Keys.Alt) != 0;
+				Control = (System.Windows.Forms.Control.ModifierKeys & Keys.Control) != 0;
+				Shift = (System.Windows.Forms.Control.ModifierKeys & Keys.Shift) != 0;
 
 				// combine the modifiers
 				Modifiers = WinAPI.KeyModifiers.None;
-				if (this.Alt)
+				if (Alt)
 				{
 					Modifiers |= WinAPI.KeyModifiers.Alt;
 				}
-				if (this.Control)
+				if (Control)
 				{
 					Modifiers |= WinAPI.KeyModifiers.Control;
 				}
-				if (this.Shift)
+				if (Shift)
 				{
 					Modifiers |= WinAPI.KeyModifiers.Shift;
 				}

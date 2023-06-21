@@ -17,15 +17,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Security;
-using System.Security.Cryptography;
-using System.Windows.Forms;
 using System.Xml;
 
 namespace WinAuth
@@ -33,7 +27,7 @@ namespace WinAuth
 	/// <summary>
 	/// General error report form
 	/// </summary>
-	public partial class DiagnosticForm : WinAuth.ResourceForm
+	public partial class DiagnosticForm : ResourceForm
 	{
 		/// <summary>
 		/// Current Winauth config settings
@@ -72,7 +66,7 @@ namespace WinAuth
 			}
 			catch (Exception ex)
 			{
-				dataText.Text = string.Format("{0}\n\n{1}", ex.Message, new System.Diagnostics.StackTrace(ex).ToString());
+				dataText.Text = string.Format("{0}\n\n{1}", ex.Message, new StackTrace(ex));
 			}
 		}
 
@@ -84,10 +78,10 @@ namespace WinAuth
 		{
 			StringBuilder diag = new StringBuilder();
 
-			if (this.Config != null)
+			if (Config != null)
 			{
 				// clone the current config so we can extract key in case machine/user encrypted
-				WinAuthConfig clone = this.Config.Clone() as WinAuthConfig;
+				WinAuthConfig clone = Config.Clone() as WinAuthConfig;
 				clone.PasswordType = Authenticator.PasswordTypes.None;
 
 				// add the config and authenticator
@@ -110,10 +104,10 @@ namespace WinAuth
 			}
 
 			// add each of the entries from the registry
-			if (this.Config != null)
+			if (Config != null)
 			{
 				diag.Append("--REGISTRY--").Append(Environment.NewLine);
-				diag.Append(WinAuthHelper.ReadBackupFromRegistry(this.Config)).Append(Environment.NewLine).Append(Environment.NewLine);
+				diag.Append(WinAuthHelper.ReadBackupFromRegistry(Config)).Append(Environment.NewLine).Append(Environment.NewLine);
 			}
 
 			// add current config file
@@ -124,9 +118,9 @@ namespace WinAuth
 			}
 
 			// add winauth log
-			string dir = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
+			string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
 			string winauthlog = Path.Combine(dir, "winauth.log");
-			if (File.Exists(winauthlog) == true)
+			if (File.Exists(winauthlog))
 			{
 				diag.Append("--WINAUTH.LOG--").Append(Environment.NewLine);
 				diag.Append(File.ReadAllText(winauthlog)).Append(Environment.NewLine).Append(Environment.NewLine);
@@ -140,7 +134,7 @@ namespace WinAuth
 				Exception ex = ErrorException;
 				while (ex != null)
 				{
-					diag.Append("Stack: ").Append(ex.Message).Append(Environment.NewLine).Append(new System.Diagnostics.StackTrace(ex).ToString()).Append(Environment.NewLine);
+					diag.Append("Stack: ").Append(ex.Message).Append(Environment.NewLine).Append(new StackTrace(ex)).Append(Environment.NewLine);
 					ex = ex.InnerException;
 				}
 				if (ErrorException is InvalidEncryptionException)

@@ -17,15 +17,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
-
 using ZXing;
+using ZXing.Common;
 
 namespace WinAuth
 {
@@ -54,7 +48,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			this.Close();
+			Close();
 		}
 
 		/// <summary>
@@ -64,10 +58,10 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void ShowSecretKeyForm_Load(object sender, EventArgs e)
 		{
-			this.secretKeyField.SecretMode = true;
+			secretKeyField.SecretMode = true;
 
 			string key = Base32.getInstance().Encode(CurrentAuthenticator.AuthenticatorData.SecretKey);
-			this.secretKeyField.Text = Regex.Replace(key, ".{3}", "$0 ").Trim();
+			secretKeyField.Text = Regex.Replace(key, ".{3}", "$0 ").Trim();
 
 			string type = CurrentAuthenticator.AuthenticatorData is HOTPAuthenticator ? "hotp" : "totp";
 			long counter = (CurrentAuthenticator.AuthenticatorData is HOTPAuthenticator ? ((HOTPAuthenticator)CurrentAuthenticator.AuthenticatorData).Counter : 0);
@@ -82,7 +76,7 @@ namespace WinAuth
 
 			BarcodeWriter writer = new BarcodeWriter();
 			writer.Format = BarcodeFormat.QR_CODE;
-			writer.Options = new ZXing.Common.EncodingOptions { Width = qrImage.Width, Height = qrImage.Height };
+			writer.Options = new EncodingOptions { Width = qrImage.Width, Height = qrImage.Height };
 			qrImage.Image = writer.Write(url);
 		}
 
@@ -93,16 +87,16 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void allowCopyCheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-			this.secretKeyField.SecretMode = !allowCopyCheckBox.Checked;
+			secretKeyField.SecretMode = !allowCopyCheckBox.Checked;
 
 			string key = Base32.getInstance().Encode(CurrentAuthenticator.AuthenticatorData.SecretKey);
-			if (this.secretKeyField.SecretMode == true)
+			if (secretKeyField.SecretMode)
 			{
-				this.secretKeyField.Text = Regex.Replace(key, ".{3}", "$0 ").Trim();
+				secretKeyField.Text = Regex.Replace(key, ".{3}", "$0 ").Trim();
 			}
 			else
 			{
-				this.secretKeyField.Text = key;
+				secretKeyField.Text = key;
 			}
 		}
 

@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class AddSteamAuthenticator
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -821,64 +825,64 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel loginTabLabel;
-		private MetroFramework.Controls.MetroButton loginButton;
-		private MetroFramework.Controls.MetroLabel authoriseTabLabel;
-		private MetroFramework.Controls.MetroLabel captchaTabLabel;
-		private MetroFramework.Controls.MetroButton confirmButton;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroTextBox captchacodeField;
-		private MetroFramework.Controls.MetroTextBox usernameField;
-		private MetroFramework.Controls.MetroButton captchaButton;
-		private WinAuth.GroupMetroRadioButton steamIconRadioButton;
-		private WinAuth.GroupMetroRadioButton steamAuthenticatorIconRadioButton;
-		private System.Windows.Forms.PictureBox steamIcon;
-		private System.Windows.Forms.PictureBox steamAuthenticatorIcon;
-		private MetroFramework.Controls.MetroLabel nameLabel;
-		private MetroFramework.Controls.MetroTextBox nameField;
-		private MetroFramework.Controls.MetroLabel iconLabel;
-		private MetroFramework.Controls.MetroTabControl tabs;
-		private MetroFramework.Controls.MetroTabPage loginTab;
-		private MetroFramework.Controls.MetroLabel passwordLabel;
-		private MetroFramework.Controls.MetroLabel usernameLabel;
-		private MetroFramework.Controls.MetroButton authcodeButton;
-		private MetroFramework.Controls.MetroTextBox passwordField;
-		private MetroFramework.Controls.MetroTabPage authTab;
-		private MetroFramework.Controls.MetroTabPage confirmTab;
-		private System.Windows.Forms.PictureBox captchaBox;
-		private MetroFramework.Controls.MetroLabel authcodeLabel;
-		private MetroFramework.Controls.MetroTextBox authcodeField;
-		private MetroFramework.Controls.MetroLabel confirmTabLabel;
-		private MetroFramework.Controls.MetroLabel activationcodeLabel;
-		private MetroFramework.Controls.MetroTextBox activationcodeField;
-		private System.Windows.Forms.Panel captchaGroup;
-		private MetroFramework.Controls.MetroTabPage addedTab;
-		private MetroFramework.Controls.MetroLabel metroLabel1;
-		private MetroFramework.Controls.MetroLabel revocationcode2Label;
+		private MetroLabel loginTabLabel;
+		private MetroButton loginButton;
+		private MetroLabel authoriseTabLabel;
+		private MetroLabel captchaTabLabel;
+		private MetroButton confirmButton;
+		private MetroButton cancelButton;
+		private MetroTextBox captchacodeField;
+		private MetroTextBox usernameField;
+		private MetroButton captchaButton;
+		private GroupMetroRadioButton steamIconRadioButton;
+		private GroupMetroRadioButton steamAuthenticatorIconRadioButton;
+		private PictureBox steamIcon;
+		private PictureBox steamAuthenticatorIcon;
+		private MetroLabel nameLabel;
+		private MetroTextBox nameField;
+		private MetroLabel iconLabel;
+		private MetroTabControl tabs;
+		private MetroTabPage loginTab;
+		private MetroLabel passwordLabel;
+		private MetroLabel usernameLabel;
+		private MetroButton authcodeButton;
+		private MetroTextBox passwordField;
+		private MetroTabPage authTab;
+		private MetroTabPage confirmTab;
+		private PictureBox captchaBox;
+		private MetroLabel authcodeLabel;
+		private MetroTextBox authcodeField;
+		private MetroLabel confirmTabLabel;
+		private MetroLabel activationcodeLabel;
+		private MetroTextBox activationcodeField;
+		private Panel captchaGroup;
+		private MetroTabPage addedTab;
+		private MetroLabel metroLabel1;
+		private MetroLabel revocationcode2Label;
 		private SecretTextBox revocationcode2Field;
-		private MetroFramework.Controls.MetroButton closeButton;
-		private MetroFramework.Controls.MetroCheckBox revocationcodeCopy;
-		private MetroFramework.Controls.MetroLabel revocationcodeText;
+		private MetroButton closeButton;
+		private MetroCheckBox revocationcodeCopy;
+		private MetroLabel revocationcodeText;
 		private SecretTextBox revocationcodeField;
-		private MetroFramework.Controls.MetroCheckBox revocationCheckbox;
-		private MetroFramework.Controls.MetroLabel revocationcodeLabel;
-		private MetroFramework.Controls.MetroCheckBox revocationcode2Copy;
-		private MetroFramework.Controls.MetroTabPage importAndroidTab;
-		private MetroFramework.Controls.MetroLabel metroLabel2;
-		private MetroFramework.Controls.MetroLabel metroLabel3;
-		private MetroFramework.Controls.MetroTextBox importUuid;
-		private MetroFramework.Controls.MetroTextBox importSteamguard;
-		private MetroFramework.Controls.MetroLabel metroLabel4;
-		private MetroFramework.Controls.MetroTabPage importSDATab;
-		private MetroFramework.Controls.MetroLabel metroLabel5;
-		private MetroFramework.Controls.MetroTextBox importSDAPath;
-		private MetroFramework.Controls.MetroButton importSDABrowse;
-		private System.Windows.Forms.ListBox importSDAList;
-		private MetroFramework.Controls.MetroLabel metroLabel7;
-		private MetroFramework.Controls.MetroLabel metroLabel6;
-		private MetroFramework.Controls.MetroLabel metroLabel8;
-		private MetroFramework.Controls.MetroTextBox importSDAPassword;
-		private MetroFramework.Controls.MetroLabel metroLabel9;
-		private MetroFramework.Controls.MetroButton importSDALoad;
+		private MetroCheckBox revocationCheckbox;
+		private MetroLabel revocationcodeLabel;
+		private MetroCheckBox revocationcode2Copy;
+		private MetroTabPage importAndroidTab;
+		private MetroLabel metroLabel2;
+		private MetroLabel metroLabel3;
+		private MetroTextBox importUuid;
+		private MetroTextBox importSteamguard;
+		private MetroLabel metroLabel4;
+		private MetroTabPage importSDATab;
+		private MetroLabel metroLabel5;
+		private MetroTextBox importSDAPath;
+		private MetroButton importSDABrowse;
+		private ListBox importSDAList;
+		private MetroLabel metroLabel7;
+		private MetroLabel metroLabel6;
+		private MetroLabel metroLabel8;
+		private MetroTextBox importSDAPassword;
+		private MetroLabel metroLabel9;
+		private MetroButton importSDALoad;
 	}
 }

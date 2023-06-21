@@ -25,8 +25,8 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-
 using MetroFramework.Forms;
+using TheArtOfDev.HtmlRenderer.WinForms;
 
 namespace WinAuth
 {
@@ -418,7 +418,7 @@ namespace WinAuth
 		/// <param name="body">main body, as text or HTML</param>
 		/// <param name="buttons">optional list of buttons</param>
 		/// <param name="animation">optional animation overrides</param>
-		public Notification(string title, string body, int hideInMs = 0, List<NotificationButton> buttons = null, NotificationAnimation animation = null) : base()
+		public Notification(string title, string body, int hideInMs = 0, List<NotificationButton> buttons = null, NotificationAnimation animation = null)
 		{
 			InitializeComponent();
 
@@ -441,9 +441,9 @@ namespace WinAuth
 			else
 			{
 				buttonPanel.Visible = true;
-				this.Height += buttonPanel.Height;
-				this.labelBody.Height -= buttonPanel.Height;
-				this.htmlBody.Height -= buttonPanel.Height;
+				Height += buttonPanel.Height;
+				labelBody.Height -= buttonPanel.Height;
+				htmlBody.Height -= buttonPanel.Height;
 
 				if (_buttons.Count >= 1)
 				{
@@ -473,7 +473,7 @@ namespace WinAuth
 			else
 			{
 				// inject browser
-				TheArtOfDev.HtmlRenderer.WinForms.HtmlPanel browser = new TheArtOfDev.HtmlRenderer.WinForms.HtmlPanel();
+				HtmlPanel browser = new HtmlPanel();
 				browser.Dock = DockStyle.Fill;
 				browser.Location = new Point(0, 0);
 				browser.Size = new Size(htmlBody.Width, htmlBody.Height);
@@ -490,8 +490,8 @@ namespace WinAuth
 
 			if (OnNotificationClicked != null)
 			{
-				this.labelBody.Cursor = Cursors.Hand;
-				this.htmlBody.Cursor = Cursors.Hand;
+				labelBody.Cursor = Cursors.Hand;
+				htmlBody.Cursor = Cursors.Hand;
 			}
 
 			_animator = new FormAnimator(this, animation.Method, animation.Direction, 500);

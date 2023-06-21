@@ -16,11 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Text;
-using System.Windows;
 using System.Windows.Forms;
 
 namespace WinAuth
@@ -56,7 +54,6 @@ namespace WinAuth
 		/// Create a new SecretTextBox
 		/// </summary>
 		public SecretTextBox()
-			: base()
 		{
 		}
 
@@ -72,22 +69,22 @@ namespace WinAuth
 			set
 			{
 				m_secretMode = value;
-				this.Enabled = !value; // we disable so cannot select/copy 
-				this.SetStyle(ControlStyles.UserPaint, value);
+				Enabled = !value; // we disable so cannot select/copy 
+				SetStyle(ControlStyles.UserPaint, value);
 				Text = m_text;
 				//
 				// when we disable secret mode we need to reset the font else sometimes it doesn't show corretly
 				if (m_fontFamily == null)
 				{
-					m_fontFamily = this.Font.FontFamily.Name;
-					m_fontSize = this.Font.Size;
+					m_fontFamily = Font.FontFamily.Name;
+					m_fontSize = Font.Size;
 				}
 				if (value == false)
 				{
-					this.Font = new Font(m_fontFamily, m_fontSize);
+					Font = new Font(m_fontFamily, m_fontSize);
 				}
 				//
-				this.Invalidate(); // force it to redraw
+				Invalidate(); // force it to redraw
 			}
 		}
 
@@ -110,13 +107,13 @@ namespace WinAuth
 		{
 			get
 			{
-				return (SecretMode == true ? m_text : base.Text);
+				return (SecretMode ? m_text : base.Text);
 			}
 			set
 			{
 				m_text = value;
-				base.Text = (SecretMode == true ? (string.IsNullOrEmpty(value) == false ? new string('*', value.Length) : value) : value);
-				this.Invalidate();
+				base.Text = (SecretMode ? (string.IsNullOrEmpty(value) == false ? new string('*', value.Length) : value) : value);
+				Invalidate();
 			}
 		}
 
@@ -132,7 +129,7 @@ namespace WinAuth
 				StringFormat sf = StringFormat.GenericTypographic;
 				sf.Alignment = StringAlignment.Center;
 				sf.LineAlignment = StringAlignment.Center;
-				g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+				g.TextRenderingHint = TextRenderingHint.AntiAlias;
 
 				string text = m_text;
 
@@ -159,7 +156,7 @@ namespace WinAuth
 				}
 
 				// draw the whole string
-				g.DrawString((text != null ? text : string.Empty), base.Font, brush, new RectangleF(0, 0, base.Width, base.Height), sf);
+				g.DrawString((text != null ? text : string.Empty), base.Font, brush, new RectangleF(0, 0, Width, Height), sf);
 			}
 		}
 

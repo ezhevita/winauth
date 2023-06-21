@@ -1,14 +1,17 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Components;
+using MetroFramework.Controls;
+using MetroFramework.Forms;
+
+namespace WinAuth
 {
-	using MetroFramework;
-	using MetroFramework.Forms;
-	
 	partial class WinAuthForm
   {
     /// <summary>
     /// Required designer variable.
     /// </summary>
-    private System.ComponentModel.IContainer components = null;
+    private IContainer components = null;
 
     /// <summary>
     /// Clean up any resources being used.
@@ -387,34 +390,34 @@
 
 		#endregion
 
-		private MetroFramework.Components.MetroStyleManager metroStyleManager;
-		private MetroFramework.Components.MetroStyleExtender metroStyleExtender;
+		private MetroStyleManager metroStyleManager;
+		private MetroStyleExtender metroStyleExtender;
 		private AuthenticatorListBox authenticatorList;
-		private System.Windows.Forms.Timer mainTimer;
-		private System.Windows.Forms.ContextMenuStrip authenticatorMenu;
-		private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
-		private MetroFramework.Controls.MetroPanel commandPanel;
-		private MetroFramework.Controls.MetroButton addAuthenticatorButton;
-		private System.Windows.Forms.ContextMenuStrip addAuthenticatorMenu;
-		private MetroFramework.Controls.MetroButton optionsButton;
-		private System.Windows.Forms.ContextMenuStrip optionsMenu;
-		private System.Windows.Forms.NotifyIcon notifyIcon;
-		private MetroFramework.Controls.MetroLabel introLabel;
-		private MetroFramework.Controls.MetroPanel passwordPanel;
-		private MetroFramework.Controls.MetroTextBox passwordField;
-		private MetroFramework.Controls.MetroButton passwordButton;
-		private MetroFramework.Controls.MetroLabel passwordErrorLabel;
-		private System.Windows.Forms.Timer passwordTimer;
-		private MetroFramework.Controls.MetroLabel passwordLabel;
-		private System.Windows.Forms.ContextMenuStrip notifyMenu;
-		private MetroFramework.Controls.MetroLink newVersionLink;
-		private System.Windows.Forms.Timer hotkeyTimer;
-		private MetroFramework.Controls.MetroPanel yubiPanel;
-		private System.Windows.Forms.PictureBox yubiImage;
-		private MetroFramework.Controls.MetroButton yubiRetryButton;
-		private MetroFramework.Controls.MetroLabel yubiLabel;
-		private MetroFramework.Controls.MetroPanel loadingPanel;
-		private System.Windows.Forms.PictureBox pictureBox1;
+		private Timer mainTimer;
+		private ContextMenuStrip authenticatorMenu;
+		private ToolStripMenuItem testToolStripMenuItem;
+		private MetroPanel commandPanel;
+		private MetroButton addAuthenticatorButton;
+		private ContextMenuStrip addAuthenticatorMenu;
+		private MetroButton optionsButton;
+		private ContextMenuStrip optionsMenu;
+		private NotifyIcon notifyIcon;
+		private MetroLabel introLabel;
+		private MetroPanel passwordPanel;
+		private MetroTextBox passwordField;
+		private MetroButton passwordButton;
+		private MetroLabel passwordErrorLabel;
+		private Timer passwordTimer;
+		private MetroLabel passwordLabel;
+		private ContextMenuStrip notifyMenu;
+		private MetroLink newVersionLink;
+		private Timer hotkeyTimer;
+		private MetroPanel yubiPanel;
+		private PictureBox yubiImage;
+		private MetroButton yubiRetryButton;
+		private MetroLabel yubiLabel;
+		private MetroPanel loadingPanel;
+		private PictureBox pictureBox1;
 
   }
 }

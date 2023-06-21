@@ -17,27 +17,22 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.ComponentModel;
-using System.Security;
+using System.Threading;
 using System.Windows.Forms;
-
-using MetroFramework.Components;
-using MetroFramework.Drawing;
-using MetroFramework.Interfaces;
-using System.Resources;
+using MetroFramework.Controls;
+using MetroFramework.Forms;
 
 namespace WinAuth
 {
 	/// <summary>
 	/// Subclass of the MetroForm that replaces Text properties of any matching controls from the resource file
 	/// </summary>
-	[Designer("MetroFramework.Design.Controls.MetroLabelDesigner, " + MetroFramework.AssemblyRef.MetroFrameworkDesignSN)]
+	//[Designer("MetroFramework.Design.Controls.MetroLabelDesigner, " + AssemblyRef.MetroFrameworkDesignSN)]
 	[ToolboxBitmap(typeof(Form))]
-	public class ResourceForm : MetroFramework.Forms.MetroForm
+	public class ResourceForm : MetroForm
 	{
 		/// <summary>
 		/// Comparer that checks two types and returns trues if they are the same or one is based on the other
@@ -70,7 +65,6 @@ namespace WinAuth
 		/// Create the new form
 		/// </summary>
 		public ResourceForm()
-			: base()
 		{
 		}
 
@@ -84,21 +78,21 @@ namespace WinAuth
 			//var controls = GetControls(this, new Type[] { typeof(MetroFramework.Controls.MetroLabel), typeof(MetroFramework.Controls.MetroCheckBox) });
 			var controls = GetControls(this);
 
-			string formname = "_" + this.Name + "_";
-			string text = WinAuthMain.StringResources.GetString(formname, System.Threading.Thread.CurrentThread.CurrentCulture);
+			string formname = "_" + Name + "_";
+			string text = WinAuthMain.StringResources.GetString(formname, Thread.CurrentThread.CurrentCulture);
 			if (text != null)
 			{
-				this.Text = text;
+				Text = text;
 			}
 			foreach (Control c in controls)
 			{
 				string controlname = formname + c.Name + "_";
-				text = WinAuthMain.StringResources.GetString(controlname, System.Threading.Thread.CurrentThread.CurrentCulture);
+				text = WinAuthMain.StringResources.GetString(controlname, Thread.CurrentThread.CurrentCulture);
 				if (text != null)
 				{
-					if (c is MetroFramework.Controls.MetroTextBox)
+					if (c is MetroTextBox)
 					{
-						((MetroFramework.Controls.MetroTextBox)c).PromptText = text;
+						((MetroTextBox)c).PromptText = text;
 					}
 					else
 					{
@@ -126,7 +120,7 @@ namespace WinAuth
 			BasedOnComparer baseComparer = new BasedOnComparer();
 			foreach (Control c in control.Controls)
 			{
-				if (controlTypes == null || controlTypes.Contains(c.GetType(), baseComparer) == true)
+				if (controlTypes == null || controlTypes.Contains(c.GetType(), baseComparer))
 				{
 					controls.Add(c);
 				}

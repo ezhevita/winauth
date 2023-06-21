@@ -17,13 +17,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace WinAuth
@@ -55,7 +50,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void AddTrionAuthenticator_Load(object sender, EventArgs e)
 		{
-			nameField.Text = this.Authenticator.Name;
+			nameField.Text = Authenticator.Name;
 
 			newSerialNumberField.SecretMode = true;
 			newLoginCodeField.SecretMode = true;
@@ -81,12 +76,12 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void newAuthenticatorTimer_Tick(object sender, EventArgs e)
 		{
-			if (this.Authenticator != null && this.Authenticator.AuthenticatorData != null)
+			if (Authenticator != null && Authenticator.AuthenticatorData != null)
 			{
-				int time = (int)(this.Authenticator.AuthenticatorData.ServerTime / 1000L) % 30;
+				int time = (int)(Authenticator.AuthenticatorData.ServerTime / 1000L) % 30;
 				if (time == 0)
 				{
-					newLoginCodeField.Text = this.Authenticator.AuthenticatorData.CurrentCode;
+					newLoginCodeField.Text = Authenticator.AuthenticatorData.CurrentCode;
 				}
 			}
 		}
@@ -98,11 +93,11 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void restoreGetQuestionsButton_Click(object sender, EventArgs e)
 		{
-			string email = this.restoreEmailField.Text.Trim();
-			string password = this.restorePasswordField.Text.Trim();
+			string email = restoreEmailField.Text.Trim();
+			string password = restorePasswordField.Text.Trim();
 			if (email.Length == 0 || password.Length == 0)
 			{
-				WinAuthForm.ErrorDialog(this.Owner, "Please enter your account email and password");
+				WinAuthForm.ErrorDialog(Owner, "Please enter your account email and password");
 				return;
 			}
 
@@ -115,13 +110,11 @@ namespace WinAuth
 			}
 			catch (InvalidRestoreResponseException irre)
 			{
-				WinAuthForm.ErrorDialog(this.Owner, irre.Message, irre);
-				return;
+				WinAuthForm.ErrorDialog(Owner, irre.Message, irre);
 			}
 			catch (Exception ex)
 			{
-				WinAuthForm.ErrorDialog(this.Owner, "Unable to access account: " + ex.Message, ex);
-				return;
+				WinAuthForm.ErrorDialog(Owner, "Unable to access account: " + ex.Message, ex);
 			}
 		}
 
@@ -132,21 +125,20 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void cancelButton_Click(object sender, EventArgs e)
 		{
-			if (this.Authenticator.AuthenticatorData != null)
+			if (Authenticator.AuthenticatorData != null)
 			{
-				DialogResult result = WinAuthForm.ConfirmDialog(this.Owner,
+				DialogResult result = WinAuthForm.ConfirmDialog(Owner,
 					"You have created a new authenticator. "
 					+ "If you have attached this authenticator to your account, you might not be able to login in the future." + Environment.NewLine + Environment.NewLine
 					+ "Do you want to save this authenticator?", MessageBoxButtons.YesNoCancel);
-				if (result == System.Windows.Forms.DialogResult.Yes)
+				if (result == DialogResult.Yes)
 				{
-					this.DialogResult = System.Windows.Forms.DialogResult.OK;
+					DialogResult = DialogResult.OK;
 					return;
 				}
-				else if (result == System.Windows.Forms.DialogResult.Cancel)
+				if (result == DialogResult.Cancel)
 				{
-					this.DialogResult = System.Windows.Forms.DialogResult.None;
-					return;
+					DialogResult = DialogResult.None;
 				}
 			}
 		}
@@ -160,8 +152,7 @@ namespace WinAuth
 		{
 			if (verifyAuthenticator() == false)
 			{
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
-				return;
+				DialogResult = DialogResult.None;
 			}
 		}
 
@@ -212,9 +203,9 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void iconRadioButton_CheckedChanged(object sender, EventArgs e)
 		{
-			if (((RadioButton)sender).Checked == true)
+			if (((RadioButton)sender).Checked)
 			{
-				this.Authenticator.Skin = (string)((RadioButton)sender).Tag;
+				Authenticator.Skin = (string)((RadioButton)sender).Tag;
 			}
 		}
 
@@ -231,7 +222,7 @@ namespace WinAuth
 			Rectangle paddedBounds = e.Bounds;
 			int yOffset = (e.State == DrawItemState.Selected) ? -2 : 1;
 			paddedBounds.Offset(1, yOffset);
-			TextRenderer.DrawText(e.Graphics, page.Text, this.Font, paddedBounds, page.ForeColor);
+			TextRenderer.DrawText(e.Graphics, page.Text, Font, paddedBounds, page.ForeColor);
 		}
 
 #endregion
@@ -244,11 +235,11 @@ namespace WinAuth
 		/// <returns>true is successful</returns>
 		private bool verifyAuthenticator()
 		{
-			if (this.tabControl1.SelectedIndex == 0)
+			if (tabControl1.SelectedIndex == 0)
 			{
-				if (this.Authenticator.AuthenticatorData == null)
+				if (Authenticator.AuthenticatorData == null)
 				{
-					WinAuthForm.ErrorDialog(this.Owner, "You need to create an authenticator and attach it to your account");
+					WinAuthForm.ErrorDialog(Owner, "You need to create an authenticator and attach it to your account");
 					return false;
 				}
 			}
@@ -260,14 +251,14 @@ namespace WinAuth
 					return false;
 				}
 
-				string email = this.restoreEmailField.Text.Trim();
-				string password = this.restorePasswordField.Text.Trim();
-				string deviceId = this.restoreDeviceIdField.Text.Trim();
-				string answer1 = this.restoreAnswer1Field.Text;
-				string answer2 = this.restoreAnswer2Field.Text;
+				string email = restoreEmailField.Text.Trim();
+				string password = restorePasswordField.Text.Trim();
+				string deviceId = restoreDeviceIdField.Text.Trim();
+				string answer1 = restoreAnswer1Field.Text;
+				string answer2 = restoreAnswer2Field.Text;
 				if (deviceId.Length == 0 || (restoreQuestion2Label.Text.Length != 0 && answer1.Length == 0) || (restoreQuestion2Label.Text.Length != 0 && answer2.Length == 0))
 				{
-					WinAuthForm.ErrorDialog(this.Owner, "Please enter the device ID and answers to your secret questions");
+					WinAuthForm.ErrorDialog(Owner, "Please enter the device ID and answers to your secret questions");
 					return false;
 				}
 
@@ -275,16 +266,16 @@ namespace WinAuth
 				{
 					TrionAuthenticator authenticator = new TrionAuthenticator();
 					authenticator.Restore(email, password, deviceId, answer1, answer2);
-					this.Authenticator.AuthenticatorData = authenticator;
+					Authenticator.AuthenticatorData = authenticator;
 				}
 				catch (InvalidRestoreResponseException irre)
 				{
-					WinAuthForm.ErrorDialog(this.Owner, "Unable to restore the authenticator: " + irre.Message, irre);
+					WinAuthForm.ErrorDialog(Owner, "Unable to restore the authenticator: " + irre.Message, irre);
 					return false;
 				}
 				catch (Exception ex)
 				{
-					WinAuthForm.ErrorDialog(this.Owner, "An error occured restoring the authenticator: " + ex.Message, ex);
+					WinAuthForm.ErrorDialog(Owner, "An error occured restoring the authenticator: " + ex.Message, ex);
 					return false;
 				}
 			}
@@ -298,18 +289,18 @@ namespace WinAuth
 		/// <param name="showWarning"></param>
 		private void clearAuthenticator(bool showWarning = true)
 		{
-			if (this.Authenticator.AuthenticatorData != null && showWarning == true)
+			if (Authenticator.AuthenticatorData != null && showWarning)
 			{
-				DialogResult result = WinAuthForm.ConfirmDialog(this.Owner,
+				DialogResult result = WinAuthForm.ConfirmDialog(Owner,
 					"This will clear the authenticator you have just created. "
 					+ "If you have attached this authenticator to your account, you might not be able to login in the future." + Environment.NewLine + Environment.NewLine
 					+ "Are you sure you want to continue?");
-				if (result != System.Windows.Forms.DialogResult.Yes)
+				if (result != DialogResult.Yes)
 				{
 					return;
 				}
 
-				this.Authenticator.AuthenticatorData = null;
+				Authenticator.AuthenticatorData = null;
 			}
 
 			newSerialNumberField.Text = string.Empty;
@@ -344,11 +335,11 @@ namespace WinAuth
 
 					TrionAuthenticator authenticator = new TrionAuthenticator();
 #if DEBUG
-					authenticator.Enroll(System.Diagnostics.Debugger.IsAttached);
+					authenticator.Enroll(Debugger.IsAttached);
 #else
 					authenticator.Enroll();
 #endif
-					this.Authenticator.AuthenticatorData = authenticator;
+					Authenticator.AuthenticatorData = authenticator;
 					newSerialNumberField.Text = authenticator.Serial;
 					newLoginCodeField.Text = authenticator.CurrentCode;
 					newRestoreCodeField.Text = authenticator.DeviceId;
@@ -357,7 +348,7 @@ namespace WinAuth
 				}
 				catch (InvalidEnrollResponseException iere)
 				{
-					if (WinAuthForm.ErrorDialog(this.Owner, "An error occured while registering a new authenticator", iere, MessageBoxButtons.RetryCancel) != System.Windows.Forms.DialogResult.Retry)
+					if (WinAuthForm.ErrorDialog(Owner, "An error occured while registering a new authenticator", iere, MessageBoxButtons.RetryCancel) != DialogResult.Retry)
 					{
 						break;
 					}

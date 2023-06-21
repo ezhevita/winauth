@@ -15,6 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+using System.ComponentModel;
+using MetroFramework.Controls;
+
 namespace WinAuth
 {
 	partial class ShowRestoreCodeForm
@@ -22,7 +26,7 @@ namespace WinAuth
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -151,12 +155,12 @@ namespace WinAuth
 
 		#endregion
 
-		private MetroFramework.Controls.MetroButton btnClose;
-		private MetroFramework.Controls.MetroLabel label4;
+		private MetroButton btnClose;
+		private MetroLabel label4;
 		private SecretTextBox restoreCodeField;
-		private MetroFramework.Controls.MetroLabel label2;
+		private MetroLabel label2;
 		private SecretTextBox serialNumberField;
-		private MetroFramework.Controls.MetroLabel label1;
-		private MetroFramework.Controls.MetroCheckBox allowCopyCheckBox;
+		private MetroLabel label1;
+		private MetroCheckBox allowCopyCheckBox;
 	}
 }

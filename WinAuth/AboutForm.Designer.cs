@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class AboutForm
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -121,11 +125,11 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel aboutLabel;
-		private MetroFramework.Controls.MetroLabel licenseLabel;
-		private System.Windows.Forms.RichTextBox richTextBox1;
-		private MetroFramework.Controls.MetroLabel trademarkLabel;
-		private MetroFramework.Controls.MetroButton reportButton;
-		private MetroFramework.Controls.MetroButton closeButton;
+		private MetroLabel aboutLabel;
+		private MetroLabel licenseLabel;
+		private RichTextBox richTextBox1;
+		private MetroLabel trademarkLabel;
+		private MetroButton reportButton;
+		private MetroButton closeButton;
 	}
 }

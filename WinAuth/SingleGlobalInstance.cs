@@ -17,13 +17,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
 
 namespace WinAuth
@@ -31,9 +28,9 @@ namespace WinAuth
 	/// <summary>
 	/// Class instance that creates a global mutex so we can ensure only one copy of application
 	/// runs at a time.
-	/// 
+	///
 	/// http://stackoverflow.com/questions/229565/what-is-a-good-pattern-for-using-a-global-mutex-in-c/229567
-	/// 
+	///
 	/// </summary>
 	public class SingleGlobalInstance : IDisposable
 	{
@@ -45,7 +42,7 @@ namespace WinAuth
 		{
 			HasHandle = false;
 
-			string appGuid = ((GuidAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value.ToString();
+			string appGuid = ((GuidAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value;
 			string userGuid = WindowsIdentity.GetCurrent().User.Value;
 			string mutexId = string.Format("Global\\{{{0}}}-{{{1}}}", userGuid, appGuid);
 			_mutex = new Mutex(false, mutexId);
@@ -81,9 +78,8 @@ namespace WinAuth
 				{
 					_mutex.ReleaseMutex();
 				}
-#if NETFX_4
+
 				_mutex.Dispose();
-#endif
 			}
 		}
 	}

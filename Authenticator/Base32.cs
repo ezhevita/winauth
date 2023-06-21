@@ -16,16 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.Serialization;
 
 namespace WinAuth
 {
@@ -121,7 +114,7 @@ namespace WinAuth
 			encoded = Regex.Replace(encoded, @"[=]*$", "");
 
 			// convert as uppercase
-			encoded = encoded.ToUpper(System.Globalization.CultureInfo.InvariantCulture);
+			encoded = encoded.ToUpper(CultureInfo.InvariantCulture);
 
 			// handle zero case
 			if (encoded.Length == 0)
@@ -135,7 +128,7 @@ namespace WinAuth
 			int buffer = 0;
 			int next = 0;
 			int bitsLeft = 0;
-			foreach (char c in encoded.ToCharArray())
+			foreach (char c in encoded)
 			{
 				if (_map.ContainsKey(c) == false)
 				{

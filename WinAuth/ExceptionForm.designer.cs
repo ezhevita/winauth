@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using System.Windows.Forms;
+
 namespace WinAuth
 {
 	partial class ExceptionForm
@@ -5,7 +8,7 @@ namespace WinAuth
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -145,11 +148,11 @@ namespace WinAuth
 
 		#endregion
 
-		private System.Windows.Forms.Button quitButton;
-		private System.Windows.Forms.Label errorLabel;
-		private System.Windows.Forms.TextBox dataText;
-		private System.Windows.Forms.PictureBox errorIcon;
-		private System.Windows.Forms.Button continueButton;
-		private System.Windows.Forms.Button detailsButton;
+		private Button quitButton;
+		private Label errorLabel;
+		private TextBox dataText;
+		private PictureBox errorIcon;
+		private Button continueButton;
+		private Button detailsButton;
 	}
 }

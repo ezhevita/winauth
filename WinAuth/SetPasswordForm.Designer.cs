@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class SetPasswordForm
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -151,13 +155,13 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel setPasswordLabel;
-		private MetroFramework.Controls.MetroTextBox passwordField;
-		private MetroFramework.Controls.MetroTextBox verifyField;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroCheckBox showCheckbox;
-		private MetroFramework.Controls.MetroLabel errorLabel;
-		private System.Windows.Forms.Timer errorTimer;
+		private MetroLabel setPasswordLabel;
+		private MetroTextBox passwordField;
+		private MetroTextBox verifyField;
+		private MetroButton cancelButton;
+		private MetroButton okButton;
+		private MetroCheckBox showCheckbox;
+		private MetroLabel errorLabel;
+		private Timer errorTimer;
 	}
 }

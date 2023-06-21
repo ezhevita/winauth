@@ -17,16 +17,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-
-using WinAuth.Resources;
 
 namespace WinAuth
 {
@@ -39,7 +31,6 @@ namespace WinAuth
 		/// Create new form
 		/// </summary>
 		public GetPGPKeyForm()
-			: base()
 		{
 			InitializeComponent();
 		}
@@ -63,10 +54,10 @@ namespace WinAuth
 		{
 			// force this window to the front and topmost
 			// see: http://stackoverflow.com/questions/278237/keep-window-on-top-and-steal-focus-in-winforms
-			var oldtopmost = this.TopMost;
-			this.TopMost = true;
-			this.TopMost = oldtopmost;
-			this.Activate();
+			var oldtopmost = TopMost;
+			TopMost = true;
+			TopMost = oldtopmost;
+			Activate();
 		}
 
 		/// <summary>
@@ -81,9 +72,9 @@ namespace WinAuth
 			ofd.Filter = "All Files (*.*)|*.*";
 			ofd.Title = "Choose PGP Key File";
 
-			if (ofd.ShowDialog(this.Parent) == System.Windows.Forms.DialogResult.OK)
+			if (ofd.ShowDialog(Parent) == DialogResult.OK)
 			{
-				this.pgpField.Text = File.ReadAllText(ofd.FileName);
+				pgpField.Text = File.ReadAllText(ofd.FileName);
 			}
 		}
 
@@ -95,14 +86,14 @@ namespace WinAuth
 		private void okButton_Click(object sender, EventArgs e)
 		{
 			// it isn't empty
-			if (this.pgpField.Text.Length == 0)
+			if (pgpField.Text.Length == 0)
 			{
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
 
-			this.PGPKey = this.pgpField.Text;
-			this.Password = this.passwordField.Text;
+			PGPKey = pgpField.Text;
+			Password = passwordField.Text;
 		}
 
 	}

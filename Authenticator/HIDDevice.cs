@@ -16,13 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-
 using Microsoft.Win32.SafeHandles;
 
 namespace WinAuth
@@ -227,7 +221,7 @@ namespace WinAuth
 
 		#region Declarations
 
-		private bool _found = false;
+		private bool _found;
 		private Guid _guid;
 		private IntPtr _hDeviceInfo = IntPtr.Zero;
 		private SP_DEVICE_INTERFACE_DATA _SP_DEVICE_INTERFACE_DATA;
@@ -438,7 +432,7 @@ namespace WinAuth
 
 		private void _Init(int vendorId, int productId, bool throwNotFoundError)
 		{
-			var devices = HIDDevice.GetAllDevices(vendorId, productId);
+			var devices = GetAllDevices(vendorId, productId);
 
 			if (devices != null && devices.Count > 0)
 			{
@@ -499,7 +493,7 @@ namespace WinAuth
 
 						_stream = new FileStream(_hidHandle, FileAccess.ReadWrite, InputReportLength, true);
 						var buffer = new byte[InputReportLength];
-						_stream.BeginRead(buffer, 0, buffer.Length, new AsyncCallback(OnReadData), buffer);
+						_stream.BeginRead(buffer, 0, buffer.Length, OnReadData, buffer);
 					}
 
 					break;
@@ -534,7 +528,7 @@ namespace WinAuth
 				}
 
 				var buf = new byte[buffer.Length];
-				_stream.BeginRead(buf, 0, buffer.Length, new AsyncCallback(OnReadData), buf);
+				_stream.BeginRead(buf, 0, buffer.Length, OnReadData, buf);
 			}
 			catch
 			{

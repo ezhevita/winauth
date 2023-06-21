@@ -18,19 +18,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-#if NETFX_4
 using System.Threading.Tasks;
-#endif
 using System.Windows.Forms;
-using MetroFramework.Controls;
 using WinAuth.Resources;
 
 namespace WinAuth
@@ -38,7 +32,7 @@ namespace WinAuth
 	/// <summary>
 	/// Form for setting the password and encryption for the current authenticators
 	/// </summary>
-	public partial class ChangePasswordForm : WinAuth.ResourceForm
+	public partial class ChangePasswordForm : ResourceForm
 	{
 		/// <summary>
 		/// Used to show a filled password box
@@ -113,7 +107,7 @@ namespace WinAuth
 			if ((PasswordType & Authenticator.PasswordTypes.Explicit) != 0)
 			{
 				passwordCheckbox.Checked = true;
-				if (HasPassword == true)
+				if (HasPassword)
 				{
 					passwordField.Text = EXISTING_PASSWORD;
 					verifyField.Text = EXISTING_PASSWORD;
@@ -150,7 +144,7 @@ namespace WinAuth
 		private void ChangePasswordForm_Shown(object sender, EventArgs e)
 		{
 			// Buf in MetroFrame where focus is not set correcty during Load, so we do it here
-			if (passwordField.Enabled == true)
+			if (passwordField.Enabled)
 			{
 				passwordField.Focus();
 			}
@@ -177,7 +171,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void yubikeyBox_CheckedChanged(object sender, EventArgs e)
 		{
-			if (yubikeyBox.Checked == true)
+			if (yubikeyBox.Checked)
 			{
 				if ((PasswordType & Authenticator.PasswordTypes.YubiKeySlot1) != 0 || (PasswordType & Authenticator.PasswordTypes.YubiKeySlot2) != 0)
 				{
@@ -194,46 +188,40 @@ namespace WinAuth
 				yubikeyStatusLabel.Text = "Initialising YubiKey...";
 				yubikeyStatusLabel.Visible = true;
 
-#if NETFX_4
 				Task.Factory.StartNew(() =>
 				{
-#endif
-					if (this.Yubikey == null)
+					if (Yubikey == null)
 					{
-						this.Yubikey = YubiKey.CreateInstance();
+						Yubikey = YubiKey.CreateInstance();
 					}
-#if NETFX_4
-				}).ContinueWith((task) =>
+				}).ContinueWith(task =>
 				{
-#endif
-				if (string.IsNullOrEmpty(this.Yubikey.Info.Error) == false)
+				if (string.IsNullOrEmpty(Yubikey.Info.Error) == false)
 					{
-						yubikeyStatusLabel.Text = this.Yubikey.Info.Error;
+						yubikeyStatusLabel.Text = Yubikey.Info.Error;
 						yubikeyBox.Checked = false;
-						this.Yubikey = null;
+						Yubikey = null;
 					}
-					else if (this.Yubikey.Info.Status.VersionMajor == 0)
+					else if (Yubikey.Info.Status.VersionMajor == 0)
 					{
 						yubikeyStatusLabel.Text = "Please insert your YubiKey";
 						yubikeyBox.Checked = false;
-						this.Yubikey = null;
+						Yubikey = null;
 					}
 					else
 					{
 						yubikeyStatusLabel.Text = string.Format("YubiKey {0}.{1}.{2}{3}",
-							this.Yubikey.Info.Status.VersionMajor,
-							this.Yubikey.Info.Status.VersionMinor,
-							this.Yubikey.Info.Status.VersionBuild,
-							(this.Yubikey.Info.Serial != 0 ? " (Serial " + this.Yubikey.Info.Serial + ")" : string.Empty));
+							Yubikey.Info.Status.VersionMajor,
+							Yubikey.Info.Status.VersionMinor,
+							Yubikey.Info.Status.VersionBuild,
+							(Yubikey.Info.Serial != 0 ? " (Serial " + Yubikey.Info.Serial + ")" : string.Empty));
 						yubiPanelIntro.Enabled = true;
 					}
-#if NETFX_4
 				}, TaskScheduler.FromCurrentSynchronizationContext());
-#endif
 			}
 			else
 			{
-				this.Yubikey = null;
+				Yubikey = null;
 
 				yubiPanelIntro.Enabled = false;
 				yubiPanelIntro.Visible = true;
@@ -253,7 +241,7 @@ namespace WinAuth
 		{
 			passwordField.Enabled = (passwordCheckbox.Checked);
 			verifyField.Enabled = (passwordCheckbox.Checked);
-			if (passwordCheckbox.Checked == true)
+			if (passwordCheckbox.Checked)
 			{
 				passwordField.Focus();
 			}
@@ -267,45 +255,45 @@ namespace WinAuth
 		private void okButton_Click(object sender, EventArgs e)
 		{
 			// check password is set if requried
-			if (passwordCheckbox.Checked == true && passwordField.Text.Trim().Length == 0)
+			if (passwordCheckbox.Checked && passwordField.Text.Trim().Length == 0)
 			{
 				WinAuthForm.ErrorDialog(this, strings.EnterPassword);
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
-			if (passwordCheckbox.Checked == true && string.Compare(passwordField.Text.Trim(), verifyField.Text.Trim()) != 0)
+			if (passwordCheckbox.Checked && string.Compare(passwordField.Text.Trim(), verifyField.Text.Trim()) != 0)
 			{
 				WinAuthForm.ErrorDialog(this, strings.PasswordsDontMatch);
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
-			if (yubikeyBox.Checked == true && YubikeySlot == 0 && (PasswordType & (Authenticator.PasswordTypes.YubiKeySlot1 | Authenticator.PasswordTypes.YubiKeySlot2)) == 0)
+			if (yubikeyBox.Checked && YubikeySlot == 0 && (PasswordType & (Authenticator.PasswordTypes.YubiKeySlot1 | Authenticator.PasswordTypes.YubiKeySlot2)) == 0)
 			{
 				WinAuthForm.ErrorDialog(this, "Please verify your YubiKey using the Use Slot or Configure Slot buttons.");
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
 
 			// set the valid password type property
 			PasswordType = Authenticator.PasswordTypes.None;
 			Password = null;
-			if (userCheckbox.Checked == true)
+			if (userCheckbox.Checked)
 			{
 				PasswordType |= Authenticator.PasswordTypes.User;
 			}
-			else if (machineCheckbox.Checked == true)
+			else if (machineCheckbox.Checked)
 			{
 				PasswordType |= Authenticator.PasswordTypes.Machine;
 			}
-			if (passwordCheckbox.Checked == true)
+			if (passwordCheckbox.Checked)
 			{
 				PasswordType |= Authenticator.PasswordTypes.Explicit;
-				if (this.passwordField.Text != EXISTING_PASSWORD)
+				if (passwordField.Text != EXISTING_PASSWORD)
 				{
-					Password = this.passwordField.Text.Trim();
+					Password = passwordField.Text.Trim();
 				}
 			}
-			if (yubikeyBox.Checked == true)
+			if (yubikeyBox.Checked)
 			{
 				if (YubikeySlot == 1)
 				{
@@ -397,23 +385,23 @@ namespace WinAuth
 
 			if (WinAuthForm.ConfirmDialog(this,
 				"This will overwrite any existing data on your YubiKey.\n\nAre you sure you want to continue?",
-				MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) != System.Windows.Forms.DialogResult.Yes)
+				MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
 			{
 				return;
 			}
 
-			int slot = (yubiSlotToggle.Checked == true ? 2 : 1);
+			int slot = (yubiSlotToggle.Checked ? 2 : 1);
 			bool press = yubiPressToggle.Checked;
 
 			// bug in YubiKey 3.2.x (and below?) where using keypress doesn't always work
 			// see http://forum.yubico.com/viewtopic.php?f=26&t=1571
-			if (press == true
-				&& (this.Yubikey.Info.Status.VersionMajor < 3
-					|| (this.Yubikey.Info.Status.VersionMajor == 3 && this.Yubikey.Info.Status.VersionMinor <= 3)))
+			if (press
+				&& (Yubikey.Info.Status.VersionMajor < 3
+					|| (Yubikey.Info.Status.VersionMajor == 3 && Yubikey.Info.Status.VersionMinor <= 3)))
 			{
 				if (WinAuthForm.ConfirmDialog(this,
 					"This is a known issue using \"Require button press\" with YubiKeys that have firmware version 3.3 and below. It can cause intermittent problems when reading the Challenge-Response. You can contact Yubico and may be able to get a free replacement.\n\nDo you want to continue anyway?",
-					MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) != System.Windows.Forms.DialogResult.Yes)
+					MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
 				{
 					return;
 				}
@@ -428,7 +416,7 @@ namespace WinAuth
 
 			try
 			{
-				this.Yubikey.SetChallengeResponse(slot, key, key.Length, press);
+				Yubikey.SetChallengeResponse(slot, key, key.Length, press);
 			}
 			catch (YubKeyException ex)
 			{
@@ -436,12 +424,12 @@ namespace WinAuth
 				return;
 			}
 
-			if (press == true)
+			if (press)
 			{
 				if (WinAuthForm.ConfirmDialog(this,
 					"Your YubiKey slot will now be verified. Please click its button when it flashes." + Environment.NewLine + Environment.NewLine + "Continue?",
 					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) != System.Windows.Forms.DialogResult.Yes)
+					MessageBoxIcon.Warning) != DialogResult.Yes)
 				{
 					WinAuthForm.ErrorDialog(this, "Your YubiKey has been updated. Please verify it before continuing.");
 					return;
@@ -454,8 +442,8 @@ namespace WinAuth
 				string challenge = "WinAuth";
 				string plain = Authenticator.ByteArrayToString(Encoding.ASCII.GetBytes(challenge));
 				Authenticator.PasswordTypes passwordType = (slot == 1 ? Authenticator.PasswordTypes.YubiKeySlot1 : Authenticator.PasswordTypes.YubiKeySlot2);
-				string encrypted = Authenticator.EncryptSequence(plain, passwordType, null, this.Yubikey);
-				plain = Authenticator.DecryptSequence(encrypted, passwordType, null, this.Yubikey);
+				string encrypted = Authenticator.EncryptSequence(plain, passwordType, null, Yubikey);
+				plain = Authenticator.DecryptSequence(encrypted, passwordType, null, Yubikey);
 				string response = Encoding.ASCII.GetString(Authenticator.StringToByteArray(plain));
 				if (challenge != response)
 				{
@@ -483,18 +471,18 @@ namespace WinAuth
 			if (WinAuthForm.ConfirmDialog(this,
 				"Your YubiKey slot will now be verified. If it requires you to press the button, please press when the light starts flashing." + Environment.NewLine + Environment.NewLine + "Continue?",
 				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Warning) != System.Windows.Forms.DialogResult.Yes)
+				MessageBoxIcon.Warning) != DialogResult.Yes)
 			{
 				return;
 			}
 
-			int slot = (yubiSlotToggle.Checked == true ? 2 : 1);
+			int slot = (yubiSlotToggle.Checked ? 2 : 1);
 
 			try
 			{
 				byte[] challenge = Encoding.ASCII.GetBytes("WinAuth");
 				// get the hash from the key
-				byte[] hash = this.Yubikey.ChallengeResponse(slot, challenge);
+				byte[] hash = Yubikey.ChallengeResponse(slot, challenge);
 			}
 			catch (ApplicationException ex)
 			{

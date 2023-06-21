@@ -18,21 +18,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
-using System.Xml.XPath;
-
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Formatting = Newtonsoft.Json.Formatting;
 
 namespace WinAuth
 {
@@ -57,7 +52,7 @@ namespace WinAuth
 
 			public override string ToString()
 			{
-				return Username + " (" + this.SteamId + ")";
+				return Username + " (" + SteamId + ")";
 			}
 		}
 
@@ -98,7 +93,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void AddSteamAuthenticator_Load(object sender, EventArgs e)
 		{
-			nameField.Text = this.Authenticator.Name;
+			nameField.Text = Authenticator.Name;
 
 			for (var i = 0; i < tabs.TabPages.Count; i++)
 			{
@@ -112,7 +107,7 @@ namespace WinAuth
 			revocationcodeField.SecretMode = true;
 			revocationcode2Field.SecretMode = true;
 
-			importSDAList.Font = this.Font;
+			importSDAList.Font = Font;
 
 			nameField.Focus();
 		}
@@ -124,10 +119,10 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void AddSteamAuthenticator_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			if (m_enroll.Success == true)
+			if (m_enroll.Success)
 			{
-				this.Authenticator.Name = nameField.Text;
-				this.DialogResult = System.Windows.Forms.DialogResult.OK;
+				Authenticator.Name = nameField.Text;
+				DialogResult = DialogResult.OK;
 			}
 		}
 
@@ -139,9 +134,9 @@ namespace WinAuth
 		private void cancelButton_Click(object sender, EventArgs e)
 		{
 			// if we press ESC after adding, make sure we save it
-			if (m_enroll.Success == true)
+			if (m_enroll.Success)
 			{
-				this.DialogResult = System.Windows.Forms.DialogResult.OK;
+				DialogResult = DialogResult.OK;
 			}
 		}
 
@@ -155,7 +150,7 @@ namespace WinAuth
 			if (activationcodeField.Text.Trim().Length == 0)
 			{
 				WinAuthForm.ErrorDialog(this, "Please enter the activation code from your email");
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
 
@@ -191,9 +186,9 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void iconRadioButton_CheckedChanged(object sender, EventArgs e)
 		{
-			if (((RadioButton)sender).Checked == true)
+			if (((RadioButton)sender).Checked)
 			{
-				this.Authenticator.Skin = (string)((RadioButton)sender).Tag;
+				Authenticator.Skin = (string)((RadioButton)sender).Tag;
 			}
 		}
 
@@ -210,7 +205,7 @@ namespace WinAuth
 			Rectangle paddedBounds = e.Bounds;
 			int yOffset = (e.State == DrawItemState.Selected) ? -2 : 1;
 			paddedBounds.Offset(1, yOffset);
-			TextRenderer.DrawText(e.Graphics, page.Text, this.Font, paddedBounds, page.ForeColor);
+			TextRenderer.DrawText(e.Graphics, page.Text, Font, paddedBounds, page.ForeColor);
 
 			captchaGroup.BackColor = page.BackColor;
 		}
@@ -224,7 +219,7 @@ namespace WinAuth
 		{
 			if (captchacodeField.Text.Trim().Length == 0)
 			{
-				WinAuthForm.ErrorDialog(this, "Please enter the characters in the image", null, MessageBoxButtons.OK);
+				WinAuthForm.ErrorDialog(this, "Please enter the characters in the image");
 				return;
 			}
 
@@ -244,7 +239,7 @@ namespace WinAuth
 		{
 			if (usernameField.Text.Trim().Length == 0 || passwordField.Text.Trim().Length == 0)
 			{
-				WinAuthForm.ErrorDialog(this, "Please enter your username and password", null, MessageBoxButtons.OK);
+				WinAuthForm.ErrorDialog(this, "Please enter your username and password");
 				return;
 			}
 
@@ -263,7 +258,7 @@ namespace WinAuth
 		{
 			if (authcodeField.Text.Trim().Length == 0)
 			{
-				WinAuthForm.ErrorDialog(this, "Please enter the authorisation code", null, MessageBoxButtons.OK);
+				WinAuthForm.ErrorDialog(this, "Please enter the authorisation code");
 				return;
 			}
 
@@ -279,13 +274,13 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void closeButton_Click(object sender, EventArgs e)
 		{
-			this.Authenticator.Name = nameField.Text;
+			Authenticator.Name = nameField.Text;
 
 			if (tabs.SelectedTab.Name == "importAndroidTab")
 			{
 				if (ImportSteamGuard() == false)
 				{
-					this.DialogResult = System.Windows.Forms.DialogResult.None;
+					DialogResult = DialogResult.None;
 					return;
 				}
 			}
@@ -293,13 +288,13 @@ namespace WinAuth
 			{
 				if (ImportSDA() == false)
 				{
-					this.DialogResult = System.Windows.Forms.DialogResult.None;
+					DialogResult = DialogResult.None;
 					return;
 				}
 			}
 
-			this.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.Close();
+			DialogResult = DialogResult.OK;
+			Close();
 		}
 
 		/// <summary>
@@ -315,7 +310,7 @@ namespace WinAuth
 				{
 					case "loginTab":
 						e.Handled = true;
-						if (m_enroll.RequiresCaptcha == true)
+						if (m_enroll.RequiresCaptcha)
 						{
 							captchaButton_Click(sender, new EventArgs());
 						}
@@ -419,7 +414,7 @@ namespace WinAuth
 			ofd.Title = "SteamDesktopAuthenticator";
 			if (ofd.ShowDialog() == DialogResult.OK)
 			{
-				this.importSDAPath.Text = ofd.FileName;
+				importSDAPath.Text = ofd.FileName;
 			}
 		}
 
@@ -449,7 +444,7 @@ namespace WinAuth
 				WinAuthForm.ErrorDialog(this, "Please enter the contents of the steam.uuid.xml file or your DeviceId");
 				return false;
 			}
-			string steamguard = this.importSteamguard.Text.Trim();
+			string steamguard = importSteamguard.Text.Trim();
 			if (steamguard.Length == 0)
 			{
 				WinAuthForm.ErrorDialog(this, "Please enter the contents of your SteamGuard file");
@@ -500,7 +495,7 @@ namespace WinAuth
 				if (node == null)
 				{
 					throw new ApplicationException("no shared_secret");
-				}			
+				}
 				secret = Convert.FromBase64String(node.Value<string>());
 
 				node = json.SelectToken("serial_number");
@@ -522,7 +517,7 @@ namespace WinAuth
 			auth.SteamData = steamguard;
 			auth.DeviceId = deviceId;
 
-			this.Authenticator.AuthenticatorData = auth;
+			Authenticator.AuthenticatorData = auth;
 
 			return true;
 		}
@@ -533,7 +528,7 @@ namespace WinAuth
 		/// <returns>true if successful</returns>
 		private bool ImportSDA()
 		{
-			var entry = this.importSDAList.SelectedItem as ImportedSDAEntry;
+			var entry = importSDAList.SelectedItem as ImportedSDAEntry;
 			if (entry == null)
 			{
 				WinAuthForm.ErrorDialog(this, "Please load and select a Steam account");
@@ -562,9 +557,9 @@ namespace WinAuth
 				}
 				else if (lkey == "account_name")
 				{
-					if (this.nameField.Text.Length == 0)
+					if (nameField.Text.Length == 0)
 					{
-						this.nameField.Text = "Steam (" + child.Value<string>() + ")";
+						nameField.Text = "Steam (" + child.Value<string>() + ")";
 					}
 				}
 				else if (lkey == "shared_secret")
@@ -572,9 +567,9 @@ namespace WinAuth
 					auth.SecretKey = Convert.FromBase64String(child.Value<string>());
 				}
 			}
-			auth.SteamData = token.ToString(Newtonsoft.Json.Formatting.None);
+			auth.SteamData = token.ToString(Formatting.None);
 
-			this.Authenticator.AuthenticatorData = auth;
+			Authenticator.AuthenticatorData = auth;
 
 			return true;
 		}
@@ -584,14 +579,14 @@ namespace WinAuth
 		/// </summary>
 		private void LoadSDA()
 		{
-			string manifestfile = this.importSDAPath.Text.Trim();
-			if (string.IsNullOrEmpty(manifestfile) == true || File.Exists(manifestfile) == false)
+			string manifestfile = importSDAPath.Text.Trim();
+			if (string.IsNullOrEmpty(manifestfile) || File.Exists(manifestfile) == false)
 			{
 				WinAuthForm.ErrorDialog(this, "Enter a path for SteamDesktopAuthenticator");
 				return;
 			}
 
-			string password = this.importSDAPassword.Text.Trim();
+			string password = importSDAPassword.Text.Trim();
 
 			importSDAList.Items.Clear();
 			try
@@ -603,7 +598,7 @@ namespace WinAuth
 					var manifest = JObject.Parse(File.ReadAllText(manifestfile));
 					var token = manifest.SelectToken("encrypted");
 					bool encrypted = token != null ? token.Value<bool>() : false;
-					if (encrypted == true && password.Length == 0)
+					if (encrypted && password.Length == 0)
 					{
 						throw new ApplicationException("Please enter your password");
 					}
@@ -684,12 +679,7 @@ namespace WinAuth
 			{
 				byte[] ciphertext = Convert.FromBase64String(data);
 
-#if NETFX_4
 				using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(salt), ImportedSDAEntry.PBKDF2_ITERATIONS))
-#endif
-#if NETFX_3
-				Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(salt), ImportedSDAEntry.PBKDF2_ITERATIONS);
-#endif
 				{
 					byte[] key = pbkdf2.GetBytes(ImportedSDAEntry.KEY_SIZE_BYTES);
 
@@ -728,11 +718,11 @@ namespace WinAuth
 			var sdaentry = new ImportedSDAEntry();
 			sdaentry.Username = token.SelectToken("account_name") != null ? token.SelectToken("account_name").Value<string>() : null;
 			sdaentry.SteamId = steamid;
-			if (string.IsNullOrEmpty(sdaentry.SteamId) == true)
+			if (string.IsNullOrEmpty(sdaentry.SteamId))
 			{
 				sdaentry.SteamId = token.SelectToken("Session.SteamID") != null ? token.SelectToken("Session.SteamID").Value<string>() : null;
 			}
-			if (string.IsNullOrEmpty(sdaentry.SteamId) == true)
+			if (string.IsNullOrEmpty(sdaentry.SteamId))
 			{
 				sdaentry.SteamId = mafile.Split('.')[0];
 			}
@@ -760,16 +750,16 @@ namespace WinAuth
 					{
 						if (string.IsNullOrEmpty(m_enroll.Error) == false)
 						{
-							WinAuthForm.ErrorDialog(this, m_enroll.Error, null, MessageBoxButtons.OK);
+							WinAuthForm.ErrorDialog(this, m_enroll.Error);
 						}
 
-						if (m_enroll.Requires2FA == true)
+						if (m_enroll.Requires2FA)
 						{
-							WinAuthForm.ErrorDialog(this, "It looks like you already have an authenticator added to you account", null, MessageBoxButtons.OK);
+							WinAuthForm.ErrorDialog(this, "It looks like you already have an authenticator added to you account");
 							return;
 						}
 
-						if (m_enroll.RequiresCaptcha == true)
+						if (m_enroll.RequiresCaptcha)
 						{
 							using (var web = new WebClient())
 							{
@@ -789,9 +779,9 @@ namespace WinAuth
 						loginButton.Enabled = true;
 						captchaGroup.Visible = false;
 
-						if (m_enroll.RequiresEmailAuth == true)
+						if (m_enroll.RequiresEmailAuth)
 						{
-							if (authoriseTabLabel.Tag == null || string.IsNullOrEmpty((string)authoriseTabLabel.Tag) == true)
+							if (authoriseTabLabel.Tag == null || string.IsNullOrEmpty((string)authoriseTabLabel.Tag))
 							{
 								authoriseTabLabel.Tag = authoriseTabLabel.Text;
 							}
@@ -802,23 +792,23 @@ namespace WinAuth
 							authcodeField.Focus();
 							return;
 						}
-						if (tabs.TabPages.ContainsKey("authTab") == true)
+						if (tabs.TabPages.ContainsKey("authTab"))
 						{
 							tabs.TabPages.RemoveByKey("authTab");
 						}
 
-						if (m_enroll.RequiresLogin == true)
+						if (m_enroll.RequiresLogin)
 						{
 							ShowTab("loginTab");
 							usernameField.Focus();
 							return;
 						}
 
-						if (m_enroll.RequiresActivation == true)
+						if (m_enroll.RequiresActivation)
 						{
 							m_enroll.Error = null;
 
-							this.Authenticator.AuthenticatorData = m_steamAuthenticator;
+							Authenticator.AuthenticatorData = m_steamAuthenticator;
 							revocationcodeField.Text = m_enroll.RevocationCode;
 
 							ShowTab("confirmTab");
@@ -828,11 +818,11 @@ namespace WinAuth
 						}
 
 						string error = m_enroll.Error;
-						if (string.IsNullOrEmpty(error) == true)
+						if (string.IsNullOrEmpty(error))
 						{
 							error = "Unable to add the add the authenticator to your account. Please try again later.";
 						}
-						WinAuthForm.ErrorDialog(this, error, null, MessageBoxButtons.OK);
+						WinAuthForm.ErrorDialog(this, error);
 
 						return;
 					}
@@ -842,15 +832,15 @@ namespace WinAuth
 					revocationcode2Field.Text = m_enroll.RevocationCode;
 					tabs.SelectedTab = tabs.TabPages["addedTab"];
 
-					this.closeButton.Location = this.cancelButton.Location;
-					this.closeButton.Visible = true;
-					this.cancelButton.Visible = false;
+					closeButton.Location = cancelButton.Location;
+					closeButton.Visible = true;
+					cancelButton.Visible = false;
 
 					break;
 				}
 				catch (InvalidEnrollResponseException iere)
 				{
-					if (WinAuthForm.ErrorDialog(this, "An error occurred while registering the authenticator", iere, MessageBoxButtons.RetryCancel) != System.Windows.Forms.DialogResult.Retry)
+					if (WinAuthForm.ErrorDialog(this, "An error occurred while registering the authenticator", iere, MessageBoxButtons.RetryCancel) != DialogResult.Retry)
 					{
 						break;
 					}
@@ -865,7 +855,7 @@ namespace WinAuth
 		/// <param name="only">hide all others, or append if false</param>
 		private void ShowTab(string name, bool only = true)
 		{
-			if (only == true)
+			if (only)
 			{
 				tabs.TabPages.Clear();
 			}

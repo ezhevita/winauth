@@ -17,22 +17,12 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Reflection;
-using System.Security;
-using System.Security.Cryptography;
-using System.Windows.Forms;
+using System.Text;
 using System.Xml;
-using System.Net;
-using System.Web;
-
 using WinAuth.Resources;
 
 namespace WinAuth
@@ -40,7 +30,7 @@ namespace WinAuth
 	/// <summary>
 	/// General error report form
 	/// </summary>
-	public partial class ExceptionForm : WinAuth.ResourceForm
+	public partial class ExceptionForm : ResourceForm
 	{
 		/// <summary>
 		/// Exception that caused the error report
@@ -68,13 +58,13 @@ namespace WinAuth
 		private void ExceptionForm_Load(object sender, EventArgs e)
 		{
 			errorIcon.Image = SystemIcons.Error.ToBitmap();
-			this.Height = detailsButton.Top + detailsButton.Height + 45;
+			Height = detailsButton.Top + detailsButton.Height + 45;
 
-			this.errorLabel.Text = string.Format(this.errorLabel.Text, (ErrorException != null ? ErrorException.Message : strings.UnknownError));
+			errorLabel.Text = string.Format(errorLabel.Text, (ErrorException != null ? ErrorException.Message : strings.UnknownError));
 
 			// build data
 #if DEBUG
-			dataText.Text = string.Format("{0}\n\n{1}", this.ErrorException.Message, new System.Diagnostics.StackTrace(this.ErrorException).ToString());
+			dataText.Text = string.Format("{0}\n\n{1}", ErrorException.Message, new StackTrace(ErrorException));
 #else
 			try
 			{
@@ -96,29 +86,19 @@ namespace WinAuth
 			StringBuilder diag = new StringBuilder();
 
 			Version version;
-#if NETFX_4
-			if (Version.TryParse(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion, out version) == true)
+			if (Version.TryParse(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion, out version))
 			{
 				diag.Append("Version:" + version.ToString(4));
 			}
-#endif
-#if NETFX_3
-			try
-			{
-				version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-				diag.Append("Version:" + version.ToString(4));
-			}
-			catch (Exception) { }
-#endif
 
 			// add winauth log
 			try
 			{
-				string dir = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
-				if (Directory.Exists(dir) == true)
+				string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
+				if (Directory.Exists(dir))
 				{
 					string winauthlog = Path.Combine(dir, "winauth.log");
-					if (File.Exists(winauthlog) == true)
+					if (File.Exists(winauthlog))
 					{
 						diag.Append("--WINAUTH.LOG--").Append(Environment.NewLine);
 						diag.Append(File.ReadAllText(winauthlog)).Append(Environment.NewLine).Append(Environment.NewLine);
@@ -135,7 +115,7 @@ namespace WinAuth
 			catch (Exception) { }
 
 			// add the current config
-			if (this.Config != null)
+			if (Config != null)
 			{
 				using (var ms = new MemoryStream())
 				{
@@ -143,7 +123,7 @@ namespace WinAuth
 					settings.Indent = true;
 					using (var xml = XmlWriter.Create(ms, settings))
 					{
-						this.Config.WriteXmlString(xml);
+						Config.WriteXmlString(xml);
 					}
 
 					ms.Position = 0;
@@ -161,7 +141,7 @@ namespace WinAuth
 				Exception ex = ErrorException;
 				while (ex != null)
 				{
-					diag.Append("Stack: ").Append(ex.Message).Append(Environment.NewLine).Append(new System.Diagnostics.StackTrace(ex).ToString()).Append(Environment.NewLine);
+					diag.Append("Stack: ").Append(ex.Message).Append(Environment.NewLine).Append(new StackTrace(ex)).Append(Environment.NewLine);
 					ex = ex.InnerException;
 				}
 				if (ErrorException is InvalidEncryptionException)
@@ -192,7 +172,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void quitButton_Click(object sender, EventArgs e)
 		{
-			this.Close();
+			Close();
 		}
 
 		/// <summary>
@@ -202,7 +182,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void continueButton_Click(object sender, EventArgs e)
 		{
-			this.Close();
+			Close();
 		}
 
 		/// <summary>
@@ -213,15 +193,15 @@ namespace WinAuth
 		private void detailsButton_Click(object sender, EventArgs e)
 		{
 			dataText.Visible = !dataText.Visible;
-			if (dataText.Visible == true)
+			if (dataText.Visible)
 			{
-				this.detailsButton.Text = strings.HideDetails;
-				this.Height += 160;
+				detailsButton.Text = strings.HideDetails;
+				Height += 160;
 			}
 			else
 			{
-				this.detailsButton.Text = strings._ExceptionForm_detailsButton_;
-				this.Height -= 160;
+				detailsButton.Text = strings._ExceptionForm_detailsButton_;
+				Height -= 160;
 			}
 		}
 

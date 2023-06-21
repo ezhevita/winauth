@@ -20,11 +20,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -44,10 +43,10 @@ namespace WinAuth
   /// <summary>
   /// Class holding configuration data for application
   /// </summary>
-  [Serializable()]
+  [Serializable]
 	public class WinAuthConfig : IList<WinAuthAuthenticator>, ICloneable, IWinAuthAuthenticatorChangedListener
   {
-    public static decimal CURRENTVERSION = decimal.Parse(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(2), System.Globalization.CultureInfo.InvariantCulture);
+    public static decimal CURRENTVERSION = decimal.Parse(Assembly.GetExecutingAssembly().GetName().Version.ToString(2), CultureInfo.InvariantCulture);
 
 		/// <summary>
 		/// Default actions for double-click or click system tray
@@ -109,11 +108,11 @@ namespace WinAuth
 
 				if ((_passwordType & Authenticator.PasswordTypes.Explicit) == 0)
 				{
-					this.Password = null;
+					Password = null;
 				}
 				if ((_passwordType & (Authenticator.PasswordTypes.YubiKeySlot1 | Authenticator.PasswordTypes.YubiKeySlot2)) == 0)
 				{
-					this.Yubi = null;
+					Yubi = null;
 				}
 			}
 		}
@@ -423,8 +422,8 @@ namespace WinAuth
 		{
 			get
 			{
-				return (string.IsNullOrEmpty(this.Filename) == false
-					&& string.Compare(Path.GetDirectoryName(this.Filename), Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), true) == 0);
+				return (string.IsNullOrEmpty(Filename) == false
+					&& string.Compare(Path.GetDirectoryName(Filename), Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), true) == 0);
 			}
 		}
 
@@ -436,23 +435,19 @@ namespace WinAuth
 		/// <returns>setting value or default value</returns>
 		public string ReadSetting(string name, string defaultValue = null)
 		{
-			if (this.IsPortable == true)
+			if (IsPortable)
 			{
 				// read setting from _settings
 				string value;
-				if (_settings.TryGetValue(name, out value) == true)
+				if (_settings.TryGetValue(name, out value))
 				{
 					return value;
 				}
-				else
-				{
-					return defaultValue;
-				}
+
+				return defaultValue;
 			}
-			else
-			{
-				return WinAuthHelper.ReadRegistryValue(name, defaultValue) as string;
-			}
+
+			return WinAuthHelper.ReadRegistryValue(name, defaultValue) as string;
 		}
 
 		/// <summary>
@@ -462,22 +457,20 @@ namespace WinAuth
 		/// <returns>string array of all child (recursively) setting names. Empty is none.</returns>
 		public string[] ReadSettingKeys(string name)
 		{
-			if (this.IsPortable == true)
+			if (IsPortable)
 			{
 				List<string> keys = new List<string>();
 				foreach (var entry in _settings)
 				{
-					if (entry.Key.StartsWith(name) == true)
+					if (entry.Key.StartsWith(name))
 					{
 						keys.Add(entry.Key);
 					}
 				}
 				return keys.ToArray();
 			}
-			else
-			{
-				return WinAuthHelper.ReadRegistryKeys(name);
-			}
+
+			return WinAuthHelper.ReadRegistryKeys(name);
 		}
 
 		/// <summary>
@@ -487,11 +480,11 @@ namespace WinAuth
 		/// <param name="value">setting value. If null, the setting is deleted.</param>
 		public void WriteSetting(string name, string value)
 		{
-			if (this.IsPortable == true)
+			if (IsPortable)
 			{
 				if (value == null)
 				{
-					if (_settings.ContainsKey(name) == true)
+					if (_settings.ContainsKey(name))
 					{
 						_settings.Remove(name);
 					}
@@ -521,7 +514,7 @@ namespace WinAuth
 		/// <returns></returns>
 		public bool IsPassword(string password)
 		{
-			return (string.Compare(password, this.Password) == 0);
+			return (string.Compare(password, Password) == 0);
 		}
 
     #endregion
@@ -533,7 +526,7 @@ namespace WinAuth
 		/// </summary>
 		private void SetIndexes()
 		{
-			int count = this.Count;
+			int count = Count;
 			for (int i = 0; i < count; i++)
 			{
 				this[i].Index = i;
@@ -546,7 +539,7 @@ namespace WinAuth
 		/// <param name="authenticator">WinAuthAuthenticator instance</param>
 		public void Add(WinAuthAuthenticator authenticator)
 		{
-			authenticator.OnWinAuthAuthenticatorChanged += new WinAuthAuthenticatorChangedHandler(this.OnWinAuthAuthenticatorChanged);
+			authenticator.OnWinAuthAuthenticatorChanged += OnWinAuthAuthenticatorChanged;
 			_authenticators.Add(authenticator);
 			SetIndexes();
 		}
@@ -559,7 +552,7 @@ namespace WinAuth
 			foreach (WinAuthAuthenticator authenticator in this)
 			{
 				authenticator.Index = 0;
-				authenticator.OnWinAuthAuthenticatorChanged -= new WinAuthAuthenticatorChangedHandler(this.OnWinAuthAuthenticatorChanged);
+				authenticator.OnWinAuthAuthenticatorChanged -= OnWinAuthAuthenticatorChanged;
 			}
 			_authenticators.Clear();
 		}
@@ -624,7 +617,7 @@ namespace WinAuth
 		/// <param name="authenticator"></param>
 		public void Insert(int index, WinAuthAuthenticator authenticator)
 		{
-			authenticator.OnWinAuthAuthenticatorChanged += new WinAuthAuthenticatorChangedHandler(this.OnWinAuthAuthenticatorChanged);
+			authenticator.OnWinAuthAuthenticatorChanged += OnWinAuthAuthenticatorChanged;
 			_authenticators.Insert(index, authenticator);
 			SetIndexes();
 		}
@@ -651,7 +644,7 @@ namespace WinAuth
 		/// <returns></returns>
 		public bool Remove(WinAuthAuthenticator authenticator)
 		{
-			authenticator.OnWinAuthAuthenticatorChanged -= new WinAuthAuthenticatorChangedHandler(this.OnWinAuthAuthenticatorChanged);
+			authenticator.OnWinAuthAuthenticatorChanged -= OnWinAuthAuthenticatorChanged;
 			bool result = _authenticators.Remove(authenticator);
 			SetIndexes();
 			return result;
@@ -663,7 +656,7 @@ namespace WinAuth
 		/// <param name="index"></param>
 		public void RemoveAt(int index)
 		{
-			_authenticators[index].OnWinAuthAuthenticatorChanged -= new WinAuthAuthenticatorChangedHandler(this.OnWinAuthAuthenticatorChanged);
+			_authenticators[index].OnWinAuthAuthenticatorChanged -= OnWinAuthAuthenticatorChanged;
 			_authenticators.RemoveAt(index);
 			SetIndexes();
 		}
@@ -758,7 +751,7 @@ namespace WinAuth
     /// <returns></returns>
     public object Clone()
     {
-      WinAuthConfig clone = (WinAuthConfig)this.MemberwiseClone();
+      WinAuthConfig clone = (WinAuthConfig)MemberwiseClone();
       // close the internal authenticator so the data is kept separate
       clone.OnConfigChanged = null;
       clone._authenticators = new List<WinAuthAuthenticator>();
@@ -766,7 +759,7 @@ namespace WinAuth
       {
         clone._authenticators.Add(wa.Clone() as WinAuthAuthenticator);
       }
-      clone.CurrentAuthenticator = (this.CurrentAuthenticator != null ? clone._authenticators[this._authenticators.IndexOf(this.CurrentAuthenticator)] : null);
+      clone.CurrentAuthenticator = (CurrentAuthenticator != null ? clone._authenticators[_authenticators.IndexOf(CurrentAuthenticator)] : null);
       return clone;
     }
 
@@ -775,7 +768,7 @@ namespace WinAuth
 			bool changed = false;
 
       reader.Read();
-      while (reader.EOF == false && reader.IsEmptyElement == true)
+      while (reader.EOF == false && reader.IsEmptyElement)
       {
         reader.Read();
       }
@@ -811,11 +804,11 @@ namespace WinAuth
 			bool changed = false;
 
       decimal version;
-			if (decimal.TryParse(reader.GetAttribute("version"), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out version) == true)
+			if (decimal.TryParse(reader.GetAttribute("version"), NumberStyles.Any, CultureInfo.InvariantCulture, out version))
       {
         Version = version;
 
-				if (version > WinAuthConfig.CURRENTVERSION)
+				if (version > CURRENTVERSION)
 				{
 					// ensure we don't overwrite a newer config
 					throw new WinAuthInvalidNewerConfigException(string.Format(strings.ConfigIsNewer, version));
@@ -823,18 +816,18 @@ namespace WinAuth
 			}
 
       string encrypted = reader.GetAttribute("encrypted");
-			this.PasswordType = Authenticator.DecodePasswordTypes(encrypted);
-      if (this.PasswordType != Authenticator.PasswordTypes.None)
+			PasswordType = Authenticator.DecodePasswordTypes(encrypted);
+      if (PasswordType != Authenticator.PasswordTypes.None)
       {
         // read the encrypted text from the node
         string data = reader.ReadElementContentAsString();
         // decrypt
 				YubiKey yubi = null;
-				if ((this.PasswordType & (Authenticator.PasswordTypes.YubiKeySlot1 | Authenticator.PasswordTypes.YubiKeySlot2)) != 0 /* && this.Yubi == null */)
+				if ((PasswordType & (Authenticator.PasswordTypes.YubiKeySlot1 | Authenticator.PasswordTypes.YubiKeySlot2)) != 0 /* && this.Yubi == null */)
 				{
 					yubi = YubiKey.CreateInstance();
 				}
-				data = Authenticator.DecryptSequence(data, this.PasswordType, password, yubi);
+				data = Authenticator.DecryptSequence(data, PasswordType, password, yubi);
 
 				using (MemoryStream ms = new MemoryStream(Authenticator.StringToByteArray(data)))
 				{
@@ -842,9 +835,9 @@ namespace WinAuth
           changed = ReadXml(reader, password);
         }
 
-				this.PasswordType = Authenticator.DecodePasswordTypes(encrypted);
-				this.Password = password;
-				this.Yubi = yubi;
+				PasswordType = Authenticator.DecodePasswordTypes(encrypted);
+				Password = password;
+				Yubi = yubi;
 
         return changed;
       }
@@ -873,12 +866,12 @@ namespace WinAuth
 							changed = ReadXmlInternal(reader, password) || changed;
 							break;
 
-						// 3.2 has new layout 
+						// 3.2 has new layout
 						case "data":
 							{
 								encrypted = reader.GetAttribute("encrypted");
-								this.PasswordType = Authenticator.DecodePasswordTypes(encrypted);
-								if (this.PasswordType != Authenticator.PasswordTypes.None)
+								PasswordType = Authenticator.DecodePasswordTypes(encrypted);
+								if (PasswordType != Authenticator.PasswordTypes.None)
 								{
                   HashAlgorithm hasher;
 									string hash = reader.GetAttribute("sha1");
@@ -895,18 +888,16 @@ namespace WinAuth
                   // read the encrypted text from the node
                   string data = reader.ReadElementContentAsString();
 
-									hasher.ComputeHash(Authenticator.StringToByteArray(data));
-#if !NETFX_3
+                  hasher.ComputeHash(Authenticator.StringToByteArray(data));
                   hasher.Dispose();
-#endif
 
                   // decrypt
                   YubiKey yubi = null;
-									if ((this.PasswordType & (Authenticator.PasswordTypes.YubiKeySlot1 | Authenticator.PasswordTypes.YubiKeySlot2)) != 0 /* && this.Yubi == null */)
+									if ((PasswordType & (Authenticator.PasswordTypes.YubiKeySlot1 | Authenticator.PasswordTypes.YubiKeySlot2)) != 0 /* && this.Yubi == null */)
 									{
 										yubi = YubiKey.CreateInstance();
 									}
-									data = Authenticator.DecryptSequence(data, this.PasswordType, password, yubi);
+									data = Authenticator.DecryptSequence(data, PasswordType, password, yubi);
 									byte[] plain = Authenticator.StringToByteArray(data);
 
 									using (MemoryStream ms = new MemoryStream(plain))
@@ -915,13 +906,13 @@ namespace WinAuth
 										changed = ReadXmlInternal(datareader, password) || changed;
 									}
 
-									this.PasswordType = Authenticator.DecodePasswordTypes(encrypted);
-									this.Password = password;
-									this.Yubi = yubi;
+									PasswordType = Authenticator.DecodePasswordTypes(encrypted);
+									Password = password;
+									Yubi = yubi;
 								}
 							}
 							break;
-						
+
 						case "alwaysontop":
               _alwaysOnTop = reader.ReadElementContentAsBoolean();
               break;
@@ -974,7 +965,7 @@ namespace WinAuth
 							break;
 
 						case "settings":
-							XmlSerializer serializer = new XmlSerializer(typeof(setting[]), new XmlRootAttribute() { ElementName = "settings" });
+							XmlSerializer serializer = new XmlSerializer(typeof(setting[]), new XmlRootAttribute { ElementName = "settings" });
 							_settings = ((setting[])serializer.Deserialize(reader)).ToDictionary(e => e.Key, e => e.Value);
 							break;
 
@@ -998,10 +989,10 @@ namespace WinAuth
             case "WinAuthAuthenticator":
 							var wa = new WinAuthAuthenticator();
               changed = wa.ReadXml(reader, password) || changed;
-              this.Add(wa);
-							if (this.CurrentAuthenticator == null)
+              Add(wa);
+							if (CurrentAuthenticator == null)
 							{
-								this.CurrentAuthenticator = wa;
+								CurrentAuthenticator = wa;
 							}
               break;
 
@@ -1021,8 +1012,8 @@ namespace WinAuth
               {
                 waold.Name = "Authenticator";
               }
-              this.Add(waold);
-              this.CurrentAuthenticator = waold;
+              Add(waold);
+              CurrentAuthenticator = waold;
               waold.AutoRefresh = defaultAutoRefresh;
               waold.AllowCopy = defaultAllowCopy;
               waold.CopyOnCode = defaultCopyOnCode;
@@ -1035,15 +1026,15 @@ namespace WinAuth
               hks.ReadXml(reader, password);
 							if (hks.HotKey != 0)
 							{
-								if (this.CurrentAuthenticator.HotKey == null)
+								if (CurrentAuthenticator.HotKey == null)
 								{
-									this.CurrentAuthenticator.HotKey = new HotKey();
+									CurrentAuthenticator.HotKey = new HotKey();
 								}
-								HotKey hotkey = this.CurrentAuthenticator.HotKey;
+								HotKey hotkey = CurrentAuthenticator.HotKey;
 								hotkey.Action = HotKey.HotKeyActions.Inject;
 								hotkey.Key = hks.HotKey;
 								hotkey.Modifiers = hks.Modifiers;
-								if (hks.WindowTitleRegex == true && string.IsNullOrEmpty(hks.WindowTitle) == false)
+								if (hks.WindowTitleRegex && string.IsNullOrEmpty(hks.WindowTitle) == false)
 								{
 									hotkey.Window = "/" + Regex.Escape(hks.WindowTitle);
 								}
@@ -1055,7 +1046,7 @@ namespace WinAuth
 								{
 									hotkey.Window = hks.ProcessName;
 								}
-								if (hks.Advanced == true)
+								if (hks.Advanced)
 								{
 									hotkey.Action = HotKey.HotKeyActions.Advanced;
 									hotkey.Advanced = hks.AdvancedScript;
@@ -1086,63 +1077,63 @@ namespace WinAuth
     {
       writer.WriteStartDocument(true);
       //
-      if (includeFilename == true && string.IsNullOrEmpty(this.Filename) == false)
+      if (includeFilename && string.IsNullOrEmpty(Filename) == false)
       {
-        writer.WriteComment(this.Filename);
+        writer.WriteComment(Filename);
       }
       //
       writer.WriteStartElement("WinAuth");
-      writer.WriteAttributeString("version", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(2));
+      writer.WriteAttributeString("version", Assembly.GetExecutingAssembly().GetName().Version.ToString(2));
       //
       writer.WriteStartElement("alwaysontop");
-      writer.WriteValue(this.AlwaysOnTop);
+      writer.WriteValue(AlwaysOnTop);
       writer.WriteEndElement();
       //
       writer.WriteStartElement("usetrayicon");
-      writer.WriteValue(this.UseTrayIcon);
+      writer.WriteValue(UseTrayIcon);
       writer.WriteEndElement();
 			//
 			writer.WriteStartElement("notifyaction");
-			writer.WriteValue(Enum.GetName(typeof(NotifyActions), this.NotifyAction));
+			writer.WriteValue(Enum.GetName(typeof(NotifyActions), NotifyAction));
 			writer.WriteEndElement();
 			//
 			writer.WriteStartElement("startwithwindows");
-      writer.WriteValue(this.StartWithWindows);
+      writer.WriteValue(StartWithWindows);
       writer.WriteEndElement();
 			//
 			writer.WriteStartElement("autosize");
-			writer.WriteValue(this.AutoSize);
+			writer.WriteValue(AutoSize);
 			writer.WriteEndElement();
 			//
-			if (this.Position.IsEmpty == false)
+			if (Position.IsEmpty == false)
 			{
 				writer.WriteStartElement("left");
-				writer.WriteValue(this.Position.X);
+				writer.WriteValue(Position.X);
 				writer.WriteEndElement();
 				writer.WriteStartElement("top");
-				writer.WriteValue(this.Position.Y);
+				writer.WriteValue(Position.Y);
 				writer.WriteEndElement();
 			}
 			//
 			writer.WriteStartElement("width");
-			writer.WriteValue(this.Width);
+			writer.WriteValue(Width);
 			writer.WriteEndElement();
 			//
 			writer.WriteStartElement("height");
-			writer.WriteValue(this.Height);
+			writer.WriteValue(Height);
 			writer.WriteEndElement();
 			//
-			if (string.IsNullOrEmpty(this.ShadowType) == false)
+			if (string.IsNullOrEmpty(ShadowType) == false)
 			{
 				writer.WriteStartElement("shadowtype");
-				writer.WriteValue(this.ShadowType);
+				writer.WriteValue(ShadowType);
 				writer.WriteEndElement();
 			}
 			//
-			if (string.IsNullOrEmpty(this.PGPKey) == false)
+			if (string.IsNullOrEmpty(PGPKey) == false)
 			{
 				writer.WriteStartElement("pgpkey");
-				writer.WriteCData(this.PGPKey);
+				writer.WriteCData(PGPKey);
 				writer.WriteEndElement();
 			}
 
@@ -1194,12 +1185,12 @@ namespace WinAuth
 
 				using (var hasher = Authenticator.SafeHasher("SHA1"))
 				{
-					string encdata = Authenticator.EncryptSequence(Authenticator.ByteArrayToString(data), PasswordType, Password, this.Yubi);
+					string encdata = Authenticator.EncryptSequence(Authenticator.ByteArrayToString(data), PasswordType, Password, Yubi);
 					string enchash = Authenticator.ByteArrayToString(hasher.ComputeHash(Authenticator.StringToByteArray(encdata)));
 					writer.WriteAttributeString("sha1", enchash);
 					writer.WriteString(encdata);
 				}
-		
+
 				writer.WriteEndElement();
 			}
 			else
@@ -1210,11 +1201,11 @@ namespace WinAuth
 				}
 			}
 
-			if (includeSettings == true && _settings.Count != 0)
+			if (includeSettings && _settings.Count != 0)
 			{
 				XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
 				ns.Add(string.Empty, string.Empty);
-				XmlSerializer serializer = new XmlSerializer(typeof(setting[]), new XmlRootAttribute() { ElementName = "settings" });
+				XmlSerializer serializer = new XmlSerializer(typeof(setting[]), new XmlRootAttribute { ElementName = "settings" });
 				serializer.Serialize(writer, _settings.Select(e => new setting { Key = e.Key, Value = e.Value }).ToArray(), ns);
 			}
 
@@ -1243,8 +1234,7 @@ namespace WinAuth
     /// Default constructor
     /// </summary>
 		public ConfigChangedEventArgs(string propertyName, WinAuthAuthenticator authenticator = null, WinAuthAuthenticatorChangedEventArgs acargs = null)
-			: base()
-		{
+    {
 			PropertyName = propertyName;
 			Authenticator = authenticator;
 			AuthenticatorChangedEventArgs = acargs;
@@ -1260,10 +1250,6 @@ namespace WinAuth
   }
   public class WinAuthConfigRequirePasswordException : ApplicationException
   {
-    public WinAuthConfigRequirePasswordException()
-      : base()
-    {
-    }
   }
 	public class WinAuthInvalidNewerConfigException : ApplicationException
 	{

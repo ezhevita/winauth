@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class UnprotectPasswordForm
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -115,10 +119,10 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroTextBox passwordField;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroLabel invalidPasswordLabel;
-		private System.Windows.Forms.Timer invalidPasswordTimer;
+		private MetroTextBox passwordField;
+		private MetroButton cancelButton;
+		private MetroButton okButton;
+		private MetroLabel invalidPasswordLabel;
+		private Timer invalidPasswordTimer;
 	}
 }

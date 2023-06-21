@@ -20,18 +20,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Windows.Forms;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Resources;
-using System.Runtime.CompilerServices;
-
+using System.Threading;
+using System.Windows.Forms;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
-
 using WinAuth.Resources;
 
 namespace WinAuth
@@ -68,106 +65,106 @@ namespace WinAuth
 		/// <summary>
 		/// Set of inbuilt icons and authenticator types
 		/// </summary>
-		public static List<Tuple<string, string>> AUTHENTICATOR_ICONS = new List<Tuple<string, string>>
+		public static List<(string, string)> AUTHENTICATOR_ICONS = new List<(string, string)>
 		{
-			{new Tuple<string,string>("WinAuth", "WinAuthIcon.png")},
+			("WinAuth", "WinAuthIcon.png"),
 
-			{new Tuple<string,string>("+Google", "GoogleIcon.png")},
-			{new Tuple<string,string>("Authenticator", "GoogleAuthenticatorIcon.png")},
-			{new Tuple<string,string>("Google", "GoogleIcon.png")},
-			{new Tuple<string,string>("Chrome", "ChromeIcon.png")},
-			{new Tuple<string,string>("Google (Blue)", "Google2Icon.png")},
-			{new Tuple<string,string>("GMail", "GMailIcon.png")},
+			("+Google", "GoogleIcon.png"),
+			("Authenticator", "GoogleAuthenticatorIcon.png"),
+			("Google", "GoogleIcon.png"),
+			("Chrome", "ChromeIcon.png"),
+			("Google (Blue)", "Google2Icon.png"),
+			("GMail", "GMailIcon.png"),
 
-			{new Tuple<string,string>("+Games", "BattleNetAuthenticatorIcon.png")},
-			{new Tuple<string,string>("Battle.Net", "BattleNetAuthenticatorIcon.png")},
-			{new Tuple<string,string>("World of Warcraft", "WarcraftIcon.png")},
-			{new Tuple<string,string>("Diablo III", "DiabloIcon.png")},
-			{new Tuple<string,string>("s8", string.Empty)},
-			{new Tuple<string,string>("Steam", "SteamAuthenticatorIcon.png")},
-			{new Tuple<string,string>("Steam (Circle)", "SteamIcon.png")},
-			{new Tuple<string,string>("s1", string.Empty)},
-			{new Tuple<string,string>("EA", "EAIcon.png")},
-			{new Tuple<string,string>("EA (White)", "EA2Icon.png")},
-			{new Tuple<string,string>("EA (Black)", "EA3Icon.png")},
-			{new Tuple<string,string>("s2", string.Empty)},
-			{new Tuple<string,string>("Origin", "OriginIcon.png")},
-			{new Tuple<string,string>("s3", string.Empty)},
-			{new Tuple<string,string>("ArenaNet", "ArenaNetIcon.png")},
-			{new Tuple<string,string>("Guild Wars 2", "GuildWarsAuthenticatorIcon.png")},
-			{new Tuple<string,string>("s4", string.Empty)},
-			{new Tuple<string,string>("Trion", "TrionAuthenticatorIcon.png")},
-			{new Tuple<string,string>("Glyph", "GlyphIcon.png")},
-			{new Tuple<string,string>("ArcheAge", "ArcheAgeIcon.png")},
-			{new Tuple<string,string>("Rift", "RiftIcon.png")},
-			{new Tuple<string,string>("Defiance", "DefianceIcon.png")},
-			{new Tuple<string,string>("s5", string.Empty)},
-			{new Tuple<string,string>("WildStar", "WildstarIcon.png")},
-			{new Tuple<string,string>("s6", string.Empty)},
-			{new Tuple<string,string>("Firefall", "FirefallIcon.png")},
-			{new Tuple<string,string>("s7", string.Empty)},
-			{new Tuple<string,string>("RuneScape", "RuneScapeIcon.png")},
-			{new Tuple<string,string>("s9", string.Empty)},
-			{new Tuple<string,string>("SWTOR", "Swtor.png")},
-			{new Tuple<string,string>("SWTOR (Empire)", "SwtorEmpire.png")},
-			{new Tuple<string,string>("SWTOR (Republic)", "SwtorRepublic.png")},
+			("+Games", "BattleNetAuthenticatorIcon.png"),
+			("Battle.Net", "BattleNetAuthenticatorIcon.png"),
+			("World of Warcraft", "WarcraftIcon.png"),
+			("Diablo III", "DiabloIcon.png"),
+			("s8", string.Empty),
+			("Steam", "SteamAuthenticatorIcon.png"),
+			("Steam (Circle)", "SteamIcon.png"),
+			("s1", string.Empty),
+			("EA", "EAIcon.png"),
+			("EA (White)", "EA2Icon.png"),
+			("EA (Black)", "EA3Icon.png"),
+			("s2", string.Empty),
+			("Origin", "OriginIcon.png"),
+			("s3", string.Empty),
+			("ArenaNet", "ArenaNetIcon.png"),
+			("Guild Wars 2", "GuildWarsAuthenticatorIcon.png"),
+			("s4", string.Empty),
+			("Trion", "TrionAuthenticatorIcon.png"),
+			("Glyph", "GlyphIcon.png"),
+			("ArcheAge", "ArcheAgeIcon.png"),
+			("Rift", "RiftIcon.png"),
+			("Defiance", "DefianceIcon.png"),
+			("s5", string.Empty),
+			("WildStar", "WildstarIcon.png"),
+			("s6", string.Empty),
+			("Firefall", "FirefallIcon.png"),
+			("s7", string.Empty),
+			("RuneScape", "RuneScapeIcon.png"),
+			("s9", string.Empty),
+			("SWTOR", "Swtor.png"),
+			("SWTOR (Empire)", "SwtorEmpire.png"),
+			("SWTOR (Republic)", "SwtorRepublic.png"),
 
-			{new Tuple<string,string>("+Software", "MicrosoftAuthenticatorIcon.png")},
-			{new Tuple<string,string>("Microsoft", "MicrosoftAuthenticatorIcon.png")},
-			{new Tuple<string,string>("Windows 8", "Windows8Icon.png")},
-			{new Tuple<string,string>("Windows 7", "Windows7Icon.png")},
-			{new Tuple<string,string>("Windows Phone", "WindowsPhoneIcon.png")},
-			{new Tuple<string,string>("s3", string.Empty)},
-			{new Tuple<string,string>("Android", "AndroidIcon.png")},
-			{new Tuple<string,string>("s4", string.Empty)},
-			{new Tuple<string,string>("Apple", "AppleIcon.png")},
-			{new Tuple<string,string>("Apple (Black)", "AppleWhiteIcon.png")},
-			{new Tuple<string,string>("Apple (Color)", "AppleColorIcon.png")},
-			{new Tuple<string,string>("Mac", "MacIcon.png")},
-			{new Tuple<string,string>("s5", string.Empty)},
-			{new Tuple<string,string>("BitBucket", "BitBucketIcon.png")},
-			{new Tuple<string,string>("DigitalOcean", "DigitalOceanIcon.png")},
-			{new Tuple<string,string>("Dreamhost", "DreamhostIcon.png")},
-			{new Tuple<string,string>("DropBox", "DropboxIcon.png")},
-			{new Tuple<string,string>("DropBox (White)", "DropboxWhiteIcon.png")},
-			{new Tuple<string,string>("Evernote", "EvernoteIcon.png")},
-			{new Tuple<string,string>("Git", "GitIcon.png")},
-			{new Tuple<string,string>("GitHub", "GitHubIcon.png")},
-			{new Tuple<string,string>("GitHub (White)", "GitHub2Icon.png")},
-			{new Tuple<string,string>("GitLab", "GitLabIcon.png")},
-			{new Tuple<string,string>("GitLab (Fox)", "GitLabFox2Icon.png")},
-			{new Tuple<string,string>("IFTTT", "IFTTTIcon.png")},
-			{new Tuple<string,string>("Itch.io", "ItchIcon.png")},
-			{new Tuple<string,string>("KickStarter", "KickStarterIcon.png")},
-			{new Tuple<string,string>("LastPass", "LastPassIcon.png")},
-			{new Tuple<string,string>("Name.com", "NameIcon.png")},
-			{new Tuple<string,string>("Teamviewer", "TeamviewerIcon.png")},
-			{new Tuple<string,string>("s7", string.Empty)},
-			{new Tuple<string,string>("Amazon", "AmazonIcon.png")},
-			{new Tuple<string,string>("Amazon AWS", "AmazonAWSIcon.png")},
-			{new Tuple<string,string>("s8", string.Empty)},
-			{new Tuple<string,string>("PayPal", "PayPalIcon.png")},
+			("+Software", "MicrosoftAuthenticatorIcon.png"),
+			("Microsoft", "MicrosoftAuthenticatorIcon.png"),
+			("Windows 8", "Windows8Icon.png"),
+			("Windows 7", "Windows7Icon.png"),
+			("Windows Phone", "WindowsPhoneIcon.png"),
+			("s3", string.Empty),
+			("Android", "AndroidIcon.png"),
+			("s4", string.Empty),
+			("Apple", "AppleIcon.png"),
+			("Apple (Black)", "AppleWhiteIcon.png"),
+			("Apple (Color)", "AppleColorIcon.png"),
+			("Mac", "MacIcon.png"),
+			("s5", string.Empty),
+			("BitBucket", "BitBucketIcon.png"),
+			("DigitalOcean", "DigitalOceanIcon.png"),
+			("Dreamhost", "DreamhostIcon.png"),
+			("DropBox", "DropboxIcon.png"),
+			("DropBox (White)", "DropboxWhiteIcon.png"),
+			("Evernote", "EvernoteIcon.png"),
+			("Git", "GitIcon.png"),
+			("GitHub", "GitHubIcon.png"),
+			("GitHub (White)", "GitHub2Icon.png"),
+			("GitLab", "GitLabIcon.png"),
+			("GitLab (Fox)", "GitLabFox2Icon.png"),
+			("IFTTT", "IFTTTIcon.png"),
+			("Itch.io", "ItchIcon.png"),
+			("KickStarter", "KickStarterIcon.png"),
+			("LastPass", "LastPassIcon.png"),
+			("Name.com", "NameIcon.png"),
+			("Teamviewer", "TeamviewerIcon.png"),
+			("s7", string.Empty),
+			("Amazon", "AmazonIcon.png"),
+			("Amazon AWS", "AmazonAWSIcon.png"),
+			("s8", string.Empty),
+			("PayPal", "PayPalIcon.png"),
 
-			{new Tuple<string,string>("+Crypto", "BitcoinIcon.png")},
-			{new Tuple<string,string>("Bitcoin", "BitcoinIcon.png")},
-			{new Tuple<string,string>("Bitcoin Gold", "BitcoinGoldIcon.png")},
-			{new Tuple<string,string>("Bitcoin Euro", "BitcoinEuroIcon.png")},
-			{new Tuple<string,string>("Litecoin", "LitecoinIcon.png")},
-			{new Tuple<string,string>("Dogecoin", "DogeIcon.png")},
+			("+Crypto", "BitcoinIcon.png"),
+			("Bitcoin", "BitcoinIcon.png"),
+			("Bitcoin Gold", "BitcoinGoldIcon.png"),
+			("Bitcoin Euro", "BitcoinEuroIcon.png"),
+			("Litecoin", "LitecoinIcon.png"),
+			("Dogecoin", "DogeIcon.png"),
 
-			{new Tuple<string,string>("+Social", "FacebookIcon.png")},
-			{new Tuple<string,string>("eBay", "eBayIcon.png")},
-			{new Tuple<string,string>("Facebook", "FacebookIcon.png")},
-			{new Tuple<string,string>("Flickr", "FlickrIcon.png")},
-			{new Tuple<string,string>("Instagram", "InstagramIcon.png")},
-			{new Tuple<string,string>("LinkedIn", "LinkedinIcon.png")},
-			{new Tuple<string,string>("Tumblr", "TumblrIcon.png")},
-			{new Tuple<string,string>("Tumblr (Flat)", "Tumblr2Icon.png")},
-			{new Tuple<string,string>("Twitter", "TwitterIcon.png")},
-			{new Tuple<string,string>("Wordpress", "WordpressIcon.png")},
-			{new Tuple<string,string>("Wordpress (B&W)", "WordpressWhiteIcon.png")},
-			{new Tuple<string,string>("Yahoo", "YahooIcon.png")},
-			{new Tuple<string,string>("Okta", "OktaVerifyAuthenticatorIcon.png")}
+			("+Social", "FacebookIcon.png"),
+			("eBay", "eBayIcon.png"),
+			("Facebook", "FacebookIcon.png"),
+			("Flickr", "FlickrIcon.png"),
+			("Instagram", "InstagramIcon.png"),
+			("LinkedIn", "LinkedinIcon.png"),
+			("Tumblr", "TumblrIcon.png"),
+			("Tumblr (Flat)", "Tumblr2Icon.png"),
+			("Twitter", "TwitterIcon.png"),
+			("Wordpress", "WordpressIcon.png"),
+			("Wordpress (B&W)", "WordpressWhiteIcon.png"),
+			("Yahoo", "YahooIcon.png"),
+			("Okta", "OktaVerifyAuthenticatorIcon.png")
 		};
 
 		public static List<RegisteredAuthenticator> REGISTERED_AUTHENTICATORS = new List<RegisteredAuthenticator>
@@ -183,7 +180,7 @@ namespace WinAuth
 			new RegisteredAuthenticator {Name="Okta Verify", AuthenticatorType=RegisteredAuthenticator.AuthenticatorTypes.OktaVerify, Icon="OktaVerifyAuthenticatorIcon.png"}
 		};
 
-		public static ResourceManager StringResources = new ResourceManager(typeof(WinAuth.Resources.strings).FullName, typeof(WinAuth.Resources.strings).Assembly);
+		public static ResourceManager StringResources = new ResourceManager(typeof(strings).FullName, typeof(strings).Assembly);
 
 		public static ILogger Logger;
 
@@ -191,15 +188,15 @@ namespace WinAuth
 		/// The main entry point for the application.
 		/// </summary>
 		[STAThread]
-    static void Main()
-    {
+		static void Main()
+		{
 			try
 			{
 				// configure Logger
 				var config = new LoggingConfiguration();
 				//
 				var fileTarget = new FileTarget();
-				string dir = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), WinAuthMain.APPLICATION_NAME);
+				string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), APPLICATION_NAME);
 				if (Directory.Exists(dir) == false)
 				{
 					dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -218,7 +215,7 @@ namespace WinAuth
 
 				using (var instance = new SingleGlobalInstance(2000))
 				{
-					if (!System.Diagnostics.Debugger.IsAttached)
+					if (!Debugger.IsAttached)
 					{
 						AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 						Application.ThreadException += OnThreadException;
@@ -250,13 +247,13 @@ namespace WinAuth
 						process.Refresh();
 
 						var hwnd = process.MainWindowHandle;
-						if (hwnd == (IntPtr)0)
+						if (hwnd == 0)
 						{
 							hwnd = WinAPI.FindWindow(null, APPLICATION_TITLE);
 						}
 
 						// send it the open message
-						WinAPI.SendMessage(hwnd, WinAPI.WM_USER + 1, 0, (IntPtr)0);
+						WinAPI.SendMessage(hwnd, WinAPI.WM_USER + 1, 0, 0);
 						return;
 					}
 				}
@@ -266,9 +263,9 @@ namespace WinAuth
 			}
 		}
 
-		static void OnThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
+		static void OnThreadException(object sender, ThreadExceptionEventArgs e)
 		{
-			LogException(e.Exception as Exception);
+			LogException(e.Exception);
 		}
 
 		static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -322,7 +319,7 @@ namespace WinAuth
 		/// <param name="msg">messagae to be logged</param>
 		public static void LogMessage(string msg)
 		{
-			if (string.IsNullOrEmpty(msg) == true)
+			if (string.IsNullOrEmpty(msg))
 			{
 				return;
 			}
@@ -334,7 +331,6 @@ namespace WinAuth
 
 		private static void main()
 		{
-#if NETFX_45
 			// Fix #226: set to use TLS1.2
 			try
 			{
@@ -344,17 +340,16 @@ namespace WinAuth
 			{
 				// not 4.5 installed - we could prompt, but not for now
 			}
-#endif
 
 			// Issue #53: set a default culture
-			if (System.Threading.Thread.CurrentThread.CurrentCulture == null || System.Threading.Thread.CurrentThread.CurrentUICulture == null)
+			if (Thread.CurrentThread.CurrentCulture == null || Thread.CurrentThread.CurrentUICulture == null)
 			{
 				CultureInfo ci = new CultureInfo("en"); // or en-US, en-GB
-				System.Threading.Thread.CurrentThread.CurrentCulture = ci;
-				System.Threading.Thread.CurrentThread.CurrentUICulture = ci;
+				Thread.CurrentThread.CurrentCulture = ci;
+				Thread.CurrentThread.CurrentUICulture = ci;
 			}
 
-			strings.Culture = System.Threading.Thread.CurrentThread.CurrentUICulture;
+			strings.Culture = Thread.CurrentThread.CurrentUICulture;
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);

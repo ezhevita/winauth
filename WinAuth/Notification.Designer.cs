@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class Notification
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -194,15 +198,15 @@
 
 		#endregion
 
-		private System.Windows.Forms.Timer lifeTimer;
-		private MetroFramework.Controls.MetroLabel labelBody;
-		private System.Windows.Forms.Panel htmlBody;
-		private MetroFramework.Controls.MetroLabel labelTitle;
-		private MetroFramework.Controls.MetroButton button1;
-		private System.Windows.Forms.Panel buttonPanel;
-		private MetroFramework.Controls.MetroButton button2;
-		private MetroFramework.Controls.MetroButton button3;
-		private System.Windows.Forms.PictureBox tradeSep;
-		private MetroFramework.Controls.MetroLink closeLink;
+		private Timer lifeTimer;
+		private MetroLabel labelBody;
+		private Panel htmlBody;
+		private MetroLabel labelTitle;
+		private MetroButton button1;
+		private Panel buttonPanel;
+		private MetroButton button2;
+		private MetroButton button3;
+		private PictureBox tradeSep;
+		private MetroLink closeLink;
 	}
 }

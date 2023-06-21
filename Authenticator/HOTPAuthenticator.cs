@@ -16,32 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Specialized;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Cache;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
-using System.Xml;
-using System.Xml.Serialization;
-using System.Xml.XPath;
-
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Macs;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Paddings;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 #if NUNIT
 using NUnit.Framework;
 #endif
@@ -70,7 +47,7 @@ namespace WinAuth
 		/// Create a new Authenticator object optionally with a specified number of digits
 		/// </summary>
 		public HOTPAuthenticator()
-			: base(DEFAULT_CODE_DIGITS)
+			: base()
 		{
 		}
 
@@ -91,7 +68,7 @@ namespace WinAuth
 			{
 				// this is the key |  serial | deviceid
 				return base.SecretData
-					+ "|" + Counter.ToString();
+					+ "|" + Counter;
 			}
 			set
 			{
@@ -132,7 +109,7 @@ namespace WinAuth
 		/// <returns>authenticator code</returns>
 		protected override string CalculateCode(bool sync = false, long counter = -1)
 		{
-			if (sync == true)
+			if (sync)
 			{
 				if (counter == -1)
 				{

@@ -1,3 +1,7 @@
+using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
 namespace WinAuth
 {
 	partial class AddMicrosoftAuthenticator
@@ -5,7 +9,7 @@ namespace WinAuth
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -317,26 +321,26 @@ namespace WinAuth
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel label2;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroTextBox secretCodeField;
-		private System.Windows.Forms.PictureBox icon2;
-		private System.Windows.Forms.PictureBox icon1;
-		private MetroFramework.Controls.MetroLabel label10;
-		private MetroFramework.Controls.MetroLabel label12;
-		private MetroFramework.Controls.MetroTextBox nameField;
-		private MetroFramework.Controls.MetroButton verifyAuthenticatorButton;
-		private MetroFramework.Controls.MetroLabel step9Label;
-		private System.Windows.Forms.ProgressBar newAuthenticatorProgress;
-		private MetroFramework.Controls.MetroCheckBox allowCopyButton;
+		private MetroLabel label2;
+		private MetroButton okButton;
+		private MetroButton cancelButton;
+		private MetroTextBox secretCodeField;
+		private PictureBox icon2;
+		private PictureBox icon1;
+		private MetroLabel label10;
+		private MetroLabel label12;
+		private MetroTextBox nameField;
+		private MetroButton verifyAuthenticatorButton;
+		private MetroLabel step9Label;
+		private ProgressBar newAuthenticatorProgress;
+		private MetroCheckBox allowCopyButton;
 		private SecretTextBox codeField;
-		private MetroFramework.Controls.MetroLabel label3;
-		private System.Windows.Forms.Timer newAuthenticatorTimer;
-		private System.Windows.Forms.PictureBox icon3;
+		private MetroLabel label3;
+		private Timer newAuthenticatorTimer;
+		private PictureBox icon3;
 		private GroupRadioButton icon2RadioButton;
 		private GroupRadioButton icon1RadioButton;
 		private GroupRadioButton icon3RadioButton;
-		private MetroFramework.Controls.MetroLabel step8Label;
+		private MetroLabel step8Label;
 	}
 }

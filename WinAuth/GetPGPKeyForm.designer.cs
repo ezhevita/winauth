@@ -1,11 +1,14 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class GetPGPKeyForm
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -160,13 +163,13 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroTextBox passwordField;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroTextBox pgpField;
-		private MetroFramework.Controls.MetroButton browseButton;
-		private MetroFramework.Controls.MetroLabel passwordLabel;
-		private MetroFramework.Controls.MetroLabel browseLabel;
-		private MetroFramework.Controls.MetroLabel pgpLabel;
+		private MetroTextBox passwordField;
+		private MetroButton cancelButton;
+		private MetroButton okButton;
+		private MetroTextBox pgpField;
+		private MetroButton browseButton;
+		private MetroLabel passwordLabel;
+		private MetroLabel browseLabel;
+		private MetroLabel pgpLabel;
 	}
 }

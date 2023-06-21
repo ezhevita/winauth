@@ -17,12 +17,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace WinAuth
@@ -52,7 +47,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			this.Close();
+			Close();
 		}
 
 		/// <summary>
@@ -64,18 +59,18 @@ namespace WinAuth
 		{
 			BattleNetAuthenticator authenticator = CurrentAuthenticator.AuthenticatorData as BattleNetAuthenticator;
 
-			this.serialNumberField.SecretMode = true;
-			this.restoreCodeField.SecretMode = true;
+			serialNumberField.SecretMode = true;
+			restoreCodeField.SecretMode = true;
 
-			this.serialNumberField.Text = authenticator.Serial;
-			this.restoreCodeField.Text = authenticator.RestoreCode;
+			serialNumberField.Text = authenticator.Serial;
+			restoreCodeField.Text = authenticator.RestoreCode;
 
 			// if needed start a background thread to verify the restore code
 			if (authenticator.RestoreCodeVerified == false)
 			{
 				BackgroundWorker verify = new BackgroundWorker();
-				verify.DoWork += new DoWorkEventHandler(VerifyRestoreCode);
-				verify.RunWorkerCompleted += new RunWorkerCompletedEventHandler(VerifyRestoreCodeCompleted);
+				verify.DoWork += VerifyRestoreCode;
+				verify.RunWorkerCompleted += VerifyRestoreCodeCompleted;
 				verify.RunWorkerAsync(CurrentAuthenticator.AuthenticatorData);
 			}
 		}
@@ -134,8 +129,8 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void allowCopyCheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-			this.serialNumberField.SecretMode = !allowCopyCheckBox.Checked;
-			this.restoreCodeField.SecretMode = !allowCopyCheckBox.Checked;
+			serialNumberField.SecretMode = !allowCopyCheckBox.Checked;
+			restoreCodeField.SecretMode = !allowCopyCheckBox.Checked;
 		}
 
 	}

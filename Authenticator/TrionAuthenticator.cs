@@ -16,26 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Security.Cryptography;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using System.Xml.Serialization;
-using System.Xml.XPath;
-
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Macs;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Paddings;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
-
 #if NUNIT
 using NUnit.Framework;
 #endif
@@ -99,7 +87,7 @@ namespace WinAuth
 			get
 			{
 				// this is the key |  serial | deviceid
-				return base.SecretData + "|" + Authenticator.ByteArrayToString(Encoding.UTF8.GetBytes(Serial)) + "|" + Authenticator.ByteArrayToString(Encoding.UTF8.GetBytes(DeviceId));
+				return base.SecretData + "|" + ByteArrayToString(Encoding.UTF8.GetBytes(Serial)) + "|" + ByteArrayToString(Encoding.UTF8.GetBytes(DeviceId));
 			}
 			set
 			{
@@ -110,22 +98,22 @@ namespace WinAuth
 					if (parts.Length == 3 && parts[1].IndexOf("-") != -1)
 					{
 						// alpha 3.0.2 version
-						SecretKey = Authenticator.StringToByteArray(parts[0]);
+						SecretKey = StringToByteArray(parts[0]);
 						Serial = parts[1];
 						DeviceId = parts[2];
 					}
 					else if (parts.Length == 4)
 					{
 						// alpha 3.0.6 version
-						SecretKey = Authenticator.StringToByteArray(parts[0]);
-						Serial = (parts.Length > 2 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[2])) : null);
-						DeviceId = (parts.Length > 3 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[3])) : null);
+						SecretKey = StringToByteArray(parts[0]);
+						Serial = (parts.Length > 2 ? Encoding.UTF8.GetString(StringToByteArray(parts[2])) : null);
+						DeviceId = (parts.Length > 3 ? Encoding.UTF8.GetString(StringToByteArray(parts[3])) : null);
 					}
 					else
 					{
 						base.SecretData = value;
-						Serial = (parts.Length > 1 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[1])) : null);
-						DeviceId = (parts.Length > 2 ? Encoding.UTF8.GetString(Authenticator.StringToByteArray(parts[2])) : null);
+						Serial = (parts.Length > 1 ? Encoding.UTF8.GetString(StringToByteArray(parts[1])) : null);
+						DeviceId = (parts.Length > 2 ? Encoding.UTF8.GetString(StringToByteArray(parts[2])) : null);
 					}
 				}
 				else
@@ -262,7 +250,7 @@ namespace WinAuth
 		public override void Sync()
 		{
 			// check if data is protected
-			if (this.SecretKey == null && this.EncryptedData != null)
+			if (SecretKey == null && EncryptedData != null)
 			{
 				throw new EncryptedSecretDataException();
 			}
@@ -325,11 +313,11 @@ namespace WinAuth
 		protected override string CalculateCode(bool resyncTime = false, long interval = -1)
 		{
 			// sync time if required
-			if (resyncTime == true || ServerTimeDiff == 0)
+			if (resyncTime || ServerTimeDiff == 0)
 			{
 				if (interval > 0)
 				{
-					ServerTimeDiff = (interval * ((long)this.Period * 1000L)) - CurrentTime;
+					ServerTimeDiff = (interval * (Period * 1000L)) - CurrentTime;
 				}
 				else
 				{

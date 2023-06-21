@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class AddTrionAuthenticator
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -572,45 +576,45 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel label1;
-		private WinAuth.SecretTextBox newRestoreCodeField;
-		private WinAuth.SecretTextBox newLoginCodeField;
-		private WinAuth.SecretTextBox newSerialNumberField;
-		private MetroFramework.Controls.MetroButton enrollAuthenticatorButton;
-		private MetroFramework.Controls.MetroLabel label3;
-		private MetroFramework.Controls.MetroLabel label2;
-		private MetroFramework.Controls.MetroCheckBox allowCopyNewButton;
-		private MetroFramework.Controls.MetroLabel label7;
-		private MetroFramework.Controls.MetroTextBox restoreDeviceIdField;
-		private MetroFramework.Controls.MetroLabel label9;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private System.Windows.Forms.Timer newAuthenticatorTimer;
-		private MetroFramework.Controls.MetroLabel label13;
-		private MetroFramework.Controls.MetroLabel label12;
-		private MetroFramework.Controls.MetroTextBox restorePasswordField;
-		private MetroFramework.Controls.MetroTextBox restoreEmailField;
-		private MetroFramework.Controls.MetroLabel restoreQuestion1Label;
-		private MetroFramework.Controls.MetroTextBox restoreAnswer1Field;
-		private MetroFramework.Controls.MetroTextBox restoreAnswer2Field;
-		private MetroFramework.Controls.MetroLabel restoreQuestion2Label;
-		private MetroFramework.Controls.MetroButton restoreGetQuestionsButton;
-		private MetroFramework.Controls.MetroLabel label8;
-		private MetroFramework.Controls.MetroLabel label5;
-		private MetroFramework.Controls.MetroLabel label4;
-		private WinAuth.GroupMetroRadioButton archeageIconRadioButton;
-		private WinAuth.GroupMetroRadioButton riftIconRadioButton;
-		private WinAuth.GroupMetroRadioButton glyphIconRadioButton;
-		private System.Windows.Forms.PictureBox archeageIcon;
-		private System.Windows.Forms.PictureBox iconRift;
-		private System.Windows.Forms.PictureBox iconGlyph;
-		private MetroFramework.Controls.MetroLabel label6;
-		private MetroFramework.Controls.MetroTextBox nameField;
-		private MetroFramework.Controls.MetroLabel label10;
-		private MetroFramework.Controls.MetroTabControl tabControl1;
-		private MetroFramework.Controls.MetroTabPage newAuthenticatorTab;
-		private MetroFramework.Controls.MetroTabPage recoverAuthenticatorTab;
-		private System.Windows.Forms.PictureBox iconTrion;
+		private MetroLabel label1;
+		private SecretTextBox newRestoreCodeField;
+		private SecretTextBox newLoginCodeField;
+		private SecretTextBox newSerialNumberField;
+		private MetroButton enrollAuthenticatorButton;
+		private MetroLabel label3;
+		private MetroLabel label2;
+		private MetroCheckBox allowCopyNewButton;
+		private MetroLabel label7;
+		private MetroTextBox restoreDeviceIdField;
+		private MetroLabel label9;
+		private MetroButton okButton;
+		private MetroButton cancelButton;
+		private Timer newAuthenticatorTimer;
+		private MetroLabel label13;
+		private MetroLabel label12;
+		private MetroTextBox restorePasswordField;
+		private MetroTextBox restoreEmailField;
+		private MetroLabel restoreQuestion1Label;
+		private MetroTextBox restoreAnswer1Field;
+		private MetroTextBox restoreAnswer2Field;
+		private MetroLabel restoreQuestion2Label;
+		private MetroButton restoreGetQuestionsButton;
+		private MetroLabel label8;
+		private MetroLabel label5;
+		private MetroLabel label4;
+		private GroupMetroRadioButton archeageIconRadioButton;
+		private GroupMetroRadioButton riftIconRadioButton;
+		private GroupMetroRadioButton glyphIconRadioButton;
+		private PictureBox archeageIcon;
+		private PictureBox iconRift;
+		private PictureBox iconGlyph;
+		private MetroLabel label6;
+		private MetroTextBox nameField;
+		private MetroLabel label10;
+		private MetroTabControl tabControl1;
+		private MetroTabPage newAuthenticatorTab;
+		private MetroTabPage recoverAuthenticatorTab;
+		private PictureBox iconTrion;
 		private GroupMetroRadioButton trionAuthenticatorRadioButton;
 	}
 }

@@ -17,21 +17,14 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Windows.Forms;
-
 using WinAuth.Resources;
-
 using ZXing;
 
 namespace WinAuth
@@ -68,7 +61,7 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void AddGoogleAuthenticator_Load(object sender, EventArgs e)
 		{
-			nameField.Text = this.Authenticator.Name;
+			nameField.Text = Authenticator.Name;
 			codeField.SecretMode = true;
 		}
 
@@ -79,13 +72,13 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void timer_Tick(object sender, EventArgs e)
 		{
-			if (this.Authenticator.AuthenticatorData != null && codeProgress.Visible == true)
+			if (Authenticator.AuthenticatorData != null && codeProgress.Visible)
 			{
-				int time = (int)(this.Authenticator.AuthenticatorData.ServerTime / 1000L) % 30;
+				int time = (int)(Authenticator.AuthenticatorData.ServerTime / 1000L) % 30;
 				codeProgress.Value = time + 1;
 				if (time == 0)
 				{
-					codeField.Text = this.Authenticator.AuthenticatorData.CurrentCode;
+					codeField.Text = Authenticator.AuthenticatorData.CurrentCode;
 				}
 			}
 		}
@@ -97,21 +90,20 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void cancelButton_Click(object sender, EventArgs e)
 		{
-			if (this.Authenticator.AuthenticatorData != null)
+			if (Authenticator.AuthenticatorData != null)
 			{
-				DialogResult result = WinAuthForm.ConfirmDialog(this.Owner,
+				DialogResult result = WinAuthForm.ConfirmDialog(Owner,
 					"WARNING: Your authenticator has not been saved." + Environment.NewLine + Environment.NewLine
 					+ "If you have added this authenticator to your online account, you will not be able to login in the future, and you need to click YES to save it." + Environment.NewLine + Environment.NewLine
 					+ "Do you want to save this authenticator?", MessageBoxButtons.YesNoCancel);
-				if (result == System.Windows.Forms.DialogResult.Yes)
+				if (result == DialogResult.Yes)
 				{
-					this.DialogResult = System.Windows.Forms.DialogResult.OK;
+					DialogResult = DialogResult.OK;
 					return;
 				}
-				else if (result == System.Windows.Forms.DialogResult.Cancel)
+				if (result == DialogResult.Cancel)
 				{
-					this.DialogResult = System.Windows.Forms.DialogResult.None;
-					return;
+					DialogResult = DialogResult.None;
 				}
 			}
 		}
@@ -123,23 +115,22 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void okButton_Click(object sender, EventArgs e)
 		{
-			string privatekey = this.secretCodeField.Text.Trim();
+			string privatekey = secretCodeField.Text.Trim();
 			if (privatekey.Length == 0)
 			{
-				WinAuthForm.ErrorDialog(this.Owner, "Please enter the Secret Code");
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				WinAuthForm.ErrorDialog(Owner, "Please enter the Secret Code");
+				DialogResult = DialogResult.None;
 				return;
 			}
-			bool first = !this.codeProgress.Visible;
+			bool first = !codeProgress.Visible;
 			if (verifyAuthenticator(privatekey) == false)
 			{
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
+				DialogResult = DialogResult.None;
 				return;
 			}
-			if (first == true)
+			if (first)
 			{
-				this.DialogResult = System.Windows.Forms.DialogResult.None;
-				return;
+				DialogResult = DialogResult.None;
 			}
 		}
 
@@ -150,10 +141,10 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void verifyButton_Click(object sender, EventArgs e)
 		{
-			string privatekey = this.secretCodeField.Text.Trim();
+			string privatekey = secretCodeField.Text.Trim();
 			if (privatekey.Length == 0)
 			{
-				WinAuthForm.ErrorDialog(this.Owner, "Please enter the Secret Code");
+				WinAuthForm.ErrorDialog(Owner, "Please enter the Secret Code");
 				return;
 			}
 			verifyAuthenticator(privatekey);
@@ -166,9 +157,9 @@ namespace WinAuth
 		/// <param name="e"></param>
 		private void iconRadioButton_CheckedChanged(object sender, EventArgs e)
 		{
-			if (((RadioButton)sender).Checked == true)
+			if (((RadioButton)sender).Checked)
 			{
-				this.Authenticator.Skin = (string)((RadioButton)sender).Tag;
+				Authenticator.Skin = (string)((RadioButton)sender).Tag;
 			}
 		}
 
@@ -230,19 +221,19 @@ namespace WinAuth
 		/// <returns>true is successful</returns>
 		private bool verifyAuthenticator(string privatekey)
 		{
-			if (string.IsNullOrEmpty(privatekey) == true)
+			if (string.IsNullOrEmpty(privatekey))
 			{
 				return false;
 			}
 
-			this.Authenticator.Name = nameField.Text;
+			Authenticator.Name = nameField.Text;
 
 			string authtype = "totp";
 
 			// if this is a URL, pull it down
 			Uri uri;
 			Match match;
-			if (Regex.IsMatch(privatekey, "https?://.*") == true && Uri.TryCreate(privatekey, UriKind.Absolute, out uri) == true)
+			if (Regex.IsMatch(privatekey, "https?://.*") && Uri.TryCreate(privatekey, UriKind.Absolute, out uri))
 			{
 				try
 				{
@@ -252,9 +243,9 @@ namespace WinAuth
 					request.UserAgent = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)";
 					using (var response = (HttpWebResponse)request.GetResponse())
 					{
-						if (response.StatusCode == HttpStatusCode.OK && response.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true)
+						if (response.StatusCode == HttpStatusCode.OK && response.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
 						{
-							using (Bitmap bitmap = (Bitmap)Bitmap.FromStream(response.GetResponseStream()))
+							using (Bitmap bitmap = (Bitmap)Image.FromStream(response.GetResponseStream()))
 							{
 								IBarcodeReader reader = new BarcodeReader();
 								var result = reader.Decode(bitmap);
@@ -268,16 +259,16 @@ namespace WinAuth
 				}
 				catch (Exception ex)
 				{
-					WinAuthForm.ErrorDialog(this.Owner, "Cannot load QR code image from " + privatekey, ex);
+					WinAuthForm.ErrorDialog(Owner, "Cannot load QR code image from " + privatekey, ex);
 					return false;
 				}
 			}
-			else if ((match = Regex.Match(privatekey, @"data:image/([^;]+);base64,(.*)", RegexOptions.IgnoreCase)).Success == true)
+			else if ((match = Regex.Match(privatekey, @"data:image/([^;]+);base64,(.*)", RegexOptions.IgnoreCase)).Success)
 			{
 				byte[] imagedata = Convert.FromBase64String(match.Groups[2].Value);
 				using (MemoryStream ms = new MemoryStream(imagedata))
 				{
-					using (Bitmap bitmap = (Bitmap)Bitmap.FromStream(ms))
+					using (Bitmap bitmap = (Bitmap)Image.FromStream(ms))
 					{
 						IBarcodeReader reader = new BarcodeReader();
 						var result = reader.Decode(bitmap);
@@ -288,10 +279,10 @@ namespace WinAuth
 					}
 				}
 			}
-			else if (IsValidFile(privatekey) == true)
+			else if (IsValidFile(privatekey))
 			{
 				// assume this is the image file
-				using (Bitmap bitmap = (Bitmap)Bitmap.FromFile(privatekey))
+				using (Bitmap bitmap = (Bitmap)Image.FromFile(privatekey))
 				{
 					IBarcodeReader reader = new BarcodeReader();
 					var result = reader.Decode(bitmap);
@@ -304,19 +295,19 @@ namespace WinAuth
 
 			// check for otpauth://, e.g. "otpauth://totp/dc3bf64c-2fd4-40fe-a8cf-83315945f08b@blockchain.info?secret=IHZJDKAEEC774BMUK3GX6SA"
 			match = Regex.Match(privatekey, @"otpauth://([^/]+)/([^?]+)\?(.*)", RegexOptions.IgnoreCase);
-			if (match.Success == true)
+			if (match.Success)
 			{
 				authtype = match.Groups[1].Value; // @todo we only handle totp (not hotp)
 				if (string.Compare(authtype, "totp", true) != 0)
 				{
-					WinAuthForm.ErrorDialog(this.Owner, "Only time-based (TOTP) authenticators are supported when adding a Google Authenticator. Use the general \"Add Authenticator\" for counter-based (HOTP) authenticators.");
+					WinAuthForm.ErrorDialog(Owner, "Only time-based (TOTP) authenticators are supported when adding a Google Authenticator. Use the general \"Add Authenticator\" for counter-based (HOTP) authenticators.");
 					return false;
 				}
 
 				string label = match.Groups[2].Value;
 				if (string.IsNullOrEmpty(label) == false)
 				{
-					this.Authenticator.Name = this.nameField.Text = label;
+					Authenticator.Name = nameField.Text = label;
 				}
 
 				NameValueCollection qs = WinAuthHelper.ParseQueryString(match.Groups[3].Value);
@@ -327,7 +318,7 @@ namespace WinAuth
 			privatekey = Regex.Replace(privatekey, @"[^0-9a-z]", "", RegexOptions.IgnoreCase);
 			if (privatekey.Length == 0)
 			{
-				WinAuthForm.ErrorDialog(this.Owner, "The secret code is not valid");
+				WinAuthForm.ErrorDialog(Owner, "The secret code is not valid");
 				return false;
 			}
 
@@ -335,13 +326,13 @@ namespace WinAuth
 			{
 				GoogleAuthenticator auth = new GoogleAuthenticator();
 				auth.Enroll(privatekey);
-				this.Authenticator.AuthenticatorData = auth;
+				Authenticator.AuthenticatorData = auth;
 
 				codeProgress.Visible = true;
 
-				string key = Base32.getInstance().Encode(this.Authenticator.AuthenticatorData.SecretKey);
-				this.secretCodeField.Text = Regex.Replace(key, ".{3}", "$0 ").Trim();
-				this.codeField.Text = auth.CurrentCode;
+				string key = Base32.getInstance().Encode(Authenticator.AuthenticatorData.SecretKey);
+				secretCodeField.Text = Regex.Replace(key, ".{3}", "$0 ").Trim();
+				codeField.Text = auth.CurrentCode;
 
 				if (auth.ServerTimeDiff == 0L && SyncErrorWarned == false)
 				{
@@ -351,7 +342,7 @@ namespace WinAuth
 			}
 			catch (Exception irre)
 			{
-				WinAuthForm.ErrorDialog(this.Owner, "Unable to create the authenticator. The secret code is probably invalid.", irre);
+				WinAuthForm.ErrorDialog(Owner, "Unable to create the authenticator. The secret code is probably invalid.", irre);
 				return false;
 			}
 

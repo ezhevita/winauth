@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class ShowSteamTradesForm
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -572,41 +576,41 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel loginTabLabel;
-		private MetroFramework.Controls.MetroButton loginButton;
-		private MetroFramework.Controls.MetroLabel captchaTabLabel;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroTextBox captchacodeField;
-		private MetroFramework.Controls.MetroTextBox usernameField;
-		private MetroFramework.Controls.MetroButton captchaButton;
-		private MetroFramework.Controls.MetroTabControl tabs;
-		private MetroFramework.Controls.MetroTabPage loginTab;
-		private MetroFramework.Controls.MetroLabel passwordLabel;
-		private MetroFramework.Controls.MetroLabel usernameLabel;
-		private MetroFramework.Controls.MetroTextBox passwordField;
-		private MetroFramework.Controls.MetroTabPage tradesTab;
-		private System.Windows.Forms.PictureBox captchaBox;
-		private System.Windows.Forms.Panel captchaGroup;
-		private MetroFramework.Controls.MetroButton closeButton;
-		private System.Windows.Forms.Panel tradePanelMaster;
-		private System.Windows.Forms.PictureBox tradeImage;
-		private MetroFramework.Controls.MetroButton tradeReject;
-		private MetroFramework.Controls.MetroButton tradeAccept;
-		private MetroFramework.Controls.MetroLabel tradeLabel;
-		private System.Windows.Forms.PictureBox tradeSep;
-		private MetroFramework.Controls.MetroLabel tradeStatus;
-		private MetroFramework.Controls.MetroLabel tradesEmptyLabel;
-		private System.Windows.Forms.Panel browserContainer;
-		private System.Windows.Forms.Panel tradesContainer;
-		private MetroFramework.Controls.MetroCheckBox rememberBox;
-		private MetroFramework.Controls.MetroButton refreshButton;
-		private MetroFramework.Controls.MetroButton logoutButton;
-		private MetroFramework.Controls.MetroLabel pollMinuesLabel;
-		private System.Windows.Forms.NumericUpDown pollNumeric;
-		private MetroFramework.Controls.MetroCheckBox pollCheckbox;
-		private System.Windows.Forms.Panel pollPanel;
-		private MetroFramework.Controls.MetroComboBox pollAction;
-		private MetroFramework.Controls.MetroButton confirmAllButton;
-		private MetroFramework.Controls.MetroButton cancelAllButton;
+		private MetroLabel loginTabLabel;
+		private MetroButton loginButton;
+		private MetroLabel captchaTabLabel;
+		private MetroButton cancelButton;
+		private MetroTextBox captchacodeField;
+		private MetroTextBox usernameField;
+		private MetroButton captchaButton;
+		private MetroTabControl tabs;
+		private MetroTabPage loginTab;
+		private MetroLabel passwordLabel;
+		private MetroLabel usernameLabel;
+		private MetroTextBox passwordField;
+		private MetroTabPage tradesTab;
+		private PictureBox captchaBox;
+		private Panel captchaGroup;
+		private MetroButton closeButton;
+		private Panel tradePanelMaster;
+		private PictureBox tradeImage;
+		private MetroButton tradeReject;
+		private MetroButton tradeAccept;
+		private MetroLabel tradeLabel;
+		private PictureBox tradeSep;
+		private MetroLabel tradeStatus;
+		private MetroLabel tradesEmptyLabel;
+		private Panel browserContainer;
+		private Panel tradesContainer;
+		private MetroCheckBox rememberBox;
+		private MetroButton refreshButton;
+		private MetroButton logoutButton;
+		private MetroLabel pollMinuesLabel;
+		private NumericUpDown pollNumeric;
+		private MetroCheckBox pollCheckbox;
+		private Panel pollPanel;
+		private MetroComboBox pollAction;
+		private MetroButton confirmAllButton;
+		private MetroButton cancelAllButton;
 	}
 }

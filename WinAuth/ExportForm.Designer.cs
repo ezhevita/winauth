@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+using MetroFramework.Controls;
+
+namespace WinAuth
 {
 	partial class ExportForm
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -284,23 +288,23 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel introLabel;
-		private MetroFramework.Controls.MetroCheckBox passwordCheckbox;
-		private System.Windows.Forms.PictureBox pictureBox2;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroButton okButton;
-		private MetroFramework.Controls.MetroTextBox passwordField;
-		private MetroFramework.Controls.MetroTextBox verifyField;
-		private MetroFramework.Controls.MetroLabel verifyFieldLabel;
-		private MetroFramework.Controls.MetroLabel passwordFieldLabel;
-		private MetroFramework.Controls.MetroCheckBox pgpCheckbox;
-		private MetroFramework.Controls.MetroButton pgpBrowse;
-		private MetroFramework.Controls.MetroTextBox pgpField;
-		private MetroFramework.Controls.MetroLabel orLabel;
-		private MetroFramework.Controls.MetroTextBox fileField;
-		private MetroFramework.Controls.MetroLabel metroLabel1;
-		private MetroFramework.Controls.MetroButton browseButton;
-		private MetroFramework.Controls.MetroLabel metroLabel2;
+		private MetroLabel introLabel;
+		private MetroCheckBox passwordCheckbox;
+		private PictureBox pictureBox2;
+		private MetroButton cancelButton;
+		private MetroButton okButton;
+		private MetroTextBox passwordField;
+		private MetroTextBox verifyField;
+		private MetroLabel verifyFieldLabel;
+		private MetroLabel passwordFieldLabel;
+		private MetroCheckBox pgpCheckbox;
+		private MetroButton pgpBrowse;
+		private MetroTextBox pgpField;
+		private MetroLabel orLabel;
+		private MetroTextBox fileField;
+		private MetroLabel metroLabel1;
+		private MetroButton browseButton;
+		private MetroLabel metroLabel2;
 
 	}
 }

@@ -1,11 +1,15 @@
-﻿namespace WinAuth
+﻿using System.ComponentModel;
+using MetroFramework.Controls;
+using MetroFramework.Drawing.Html;
+
+namespace WinAuth
 {
 	partial class SetShortcutKeyForm
 	{
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		private IContainer components = null;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -337,24 +341,24 @@
 
 		#endregion
 
-		private MetroFramework.Controls.MetroLabel introLabel;
-		private MetroFramework.Controls.MetroToggle shiftToggle;
-		private MetroFramework.Controls.MetroLabel ctrlLabel;
-		private MetroFramework.Controls.MetroLabel shiftLabel;
-		private MetroFramework.Controls.MetroLabel altLabel;
-		private MetroFramework.Controls.MetroToggle ctrlToggle;
-		private MetroFramework.Controls.MetroToggle altToggle;
-		private MetroFramework.Controls.MetroComboBox keyCombo;
-		private MetroFramework.Controls.MetroLabel keyLabel;
-		private MetroFramework.Controls.MetroButton cancelButton;
-		private MetroFramework.Controls.MetroButton okButton;
+		private MetroLabel introLabel;
+		private MetroToggle shiftToggle;
+		private MetroLabel ctrlLabel;
+		private MetroLabel shiftLabel;
+		private MetroLabel altLabel;
+		private MetroToggle ctrlToggle;
+		private MetroToggle altToggle;
+		private MetroComboBox keyCombo;
+		private MetroLabel keyLabel;
+		private MetroButton cancelButton;
+		private MetroButton okButton;
 		private GroupMetroRadioButton injectRadioButton;
 		private GroupMetroRadioButton pasteRadioButton;
 		private GroupMetroRadioButton advancedRadioButton;
-		private MetroFramework.Controls.MetroTextBox advancedTextbox;
-		private MetroFramework.Controls.MetroTextBox injectTextbox;
-		private MetroFramework.Drawing.Html.HtmlToolTip tooltip;
-		private MetroFramework.Controls.MetroLink advancedLink;
+		private MetroTextBox advancedTextbox;
+		private MetroTextBox injectTextbox;
+		private HtmlToolTip tooltip;
+		private MetroLink advancedLink;
 		private GroupMetroRadioButton notifyRadioButton;
 	}
 }
