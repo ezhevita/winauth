@@ -26,6 +26,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 
 using NLog;
@@ -299,7 +300,7 @@ namespace WinAuth
 			}
 
 			/// <summary>
-			/// Convert json data into session 
+			/// Convert json data into session
 			/// </summary>
 			/// <param name="json"></param>
 			private void FromJson(string json)
@@ -374,18 +375,10 @@ namespace WinAuth
 		/// </summary>
 		private string ConfirmationsQuery;
 
-#if NETFX_4
 		/// <summary>
 		/// Cancellation token for poller
 		/// </summary>
 		private CancellationTokenSource _pollerCancellation;
-#endif
-#if NETFX_3
-		/// <summary>
-		/// Cancellation token for poller
-		/// </summary>
-		private ManualResetEvent _pollerCancellation;
-#endif
 
 		/// <summary>
 		/// Number of Confirmation retries
@@ -806,7 +799,6 @@ namespace WinAuth
 		}
 #endif
 
-#if NETFX_4
 		/// <summary>
 		/// Stop the current poller
 		/// </summary>
@@ -956,140 +948,7 @@ namespace WinAuth
 			{
 			}
 		}
-#endif
 
-#if NETFX_3
-		/// <summary>
-		/// Stop the current poller
-		/// </summary>
-		protected void PollConfirmationsStop()
-		{
-			// kill any existing poller
-			if (_pollerCancellation != null)
-			{
-				_pollerCancellation.Set();
-				_pollerCancellation = null;
-			}
-			this.Session.Confirmations = null;
-		}
-
-		/// <summary>
-		/// Start a new poller
-		/// </summary>
-		/// <param name="poller"></param>
-		public void PollConfirmations(ConfirmationPoller poller)
-		{
-			PollConfirmationsStop();
-
-			if (poller == null || poller.Duration <= 0)
-			{
-				return;
-			}
-
-			if (this.Session.Confirmations == null)
-			{
-				this.Session.Confirmations = new ConfirmationPoller();
-			}
-			this.Session.Confirmations = poller;
-
-			//_pollerCancellation = new CancellationTokenSource();
-			//var token = _pollerCancellation.Token;
-			//Task.Factory.StartNew(() => PollConfirmations(token), token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
-			_pollerCancellation = new ManualResetEvent(false);
-			var thread = new Thread(new ParameterizedThreadStart(PollConfirmations));
-			thread.IsBackground = true;
-			thread.Start(_pollerCancellation);
-		}
-
-		/// <summary>
-		/// Confirmation polling task
-		/// </summary>
-		/// <param name="cancel"></param>
-		public void PollConfirmations(object p1)
-		{
-			ManualResetEvent cancel = (ManualResetEvent)p1;
-			lock (this.Session.Confirmations)
-			{
-				if (this.Session.Confirmations.Ids == null)
-				{
-					try
-					{
-						// this will update the session
-						GetConfirmations();
-					}
-					catch (InvalidSteamRequestException)
-					{
-						// ignore in case of Steam timeout
-					}
-				}
-			}
-
-			try
-			{
-				int retryCount = 0;
-				while (this.Session.Confirmations != null && !cancel.WaitOne(this.Session.Confirmations.Duration * 60 * 1000))
-				{
-					try
-					{
-						List<string> currentIds;
-						lock (this.Session.Confirmations)
-						{
-							currentIds = this.Session.Confirmations.Ids;
-						}
-
-						var confs = GetConfirmations();
-
-						// check for new ids
-						List<string> newIds;
-						if (currentIds == null)
-						{
-							newIds = confs.Select(t => t.Id).ToList();
-						}
-						else
-						{
-							newIds = confs.Select(t => t.Id).Except(currentIds).ToList();
-						}
-
-						// fire events if subscriber
-						if (ConfirmationEvent != null && newIds.Count() != 0)
-						{
-							foreach (var confId in newIds)
-							{
-								var newConf = confs.Where(t => t.Id == confId).FirstOrDefault();
-								if (newConf != null)
-								{
-									ConfirmationEvent(this, newConf, this.Session.Confirmations.Action);
-								}
-							}
-						}
-
-						retryCount = 0;
-					}
-					catch (Exception ex)
-					{
-						retryCount++;
-						if (retryCount >= ConfirmationPollerRetries)
-						{
-							ConfirmationErrorEvent(this, "Failed to read confirmations", this.Session.Confirmations.Action, ex);
-						}
-						else
-						{
-							// try and reset the session
-							try
-							{
-								this.Refresh();
-							}
-							catch (Exception) { }
-						}
-					}
-				}
-			}
-			catch (ThreadAbortException)
-			{
-			}
-		}
-#endif
 
 		/// <summary>
 		/// Get the current trade Confirmations
